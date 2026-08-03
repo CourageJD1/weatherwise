@@ -158,7 +158,7 @@ Done when: `npm run dev` works in both folders and /api/health returns 200.
 ## Phase 3: database layer
 
 ```
-Context: scaffold works. MySQL Server is running locally on port [YOUR PORT].
+Context: scaffold works. MySQL Server is running locally on port 3308.
 
 Task: build the database layer.
 - backend/src/config/db.js: a mysql2/promise connection pool reading from .env
