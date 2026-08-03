@@ -83,8 +83,10 @@ CREATE TABLE IF NOT EXISTS weather_records (
    routes each date to archive vs forecast accordingly. Verify exact parameter
    names against the live docs in Phase 4 — do not code from memory.
 3. **Date-range validation:** real dates, start ≤ end, range capped at 90 days,
-   and reject ranges extending more than 16 days into the future (forecast API
-   limit) with a message that says so.
+   and reject ranges extending more than 15 days into the future, with a
+   message that says so. (Open-Meteo's `forecast_days` maxes at 16 but counts
+   today as day 1, so the furthest fetchable date is today + 15 — found during
+   phase 4 review.)
 4. **Fuzzy matching:** take Open-Meteo geocoding's top-ranked candidate; a
    coordinate-shaped input ("40.7,-74.0") is detected by regex and bypasses the
    text geocoder.

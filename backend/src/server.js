@@ -1,6 +1,8 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import { initSchema } from './db/schema.js';
+import recordsRouter from './routes/records.js';
+import { errorHandler } from './middleware/errorHandler.js';
 
 dotenv.config();
 
@@ -21,6 +23,11 @@ app.use(express.json());
 app.get('/api/health', (req, res) => {
   res.json({ success: true, data: { status: 'ok' }, error: null });
 });
+
+app.use('/api/records', recordsRouter);
+
+// Must be registered after all routes so thrown/next()ed errors land here.
+app.use(errorHandler);
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
