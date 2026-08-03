@@ -189,6 +189,9 @@ Functions needed:
 - getCurrent(lat, lon)
 - getForecast(lat, lon): 5 days
 - getHistorical(lat, lon, startDate, endDate): uses the Open-Meteo archive API
+  for older dates, but the archive lags ~5 days behind, so route recent past
+  dates through the forecast API's past_days parameter (see docs/PLAN.md
+  decision 2)
 - getAirQuality(lat, lon)
 
 IMPORTANT: fetch and read the current Open-Meteo documentation before writing
@@ -214,7 +217,9 @@ Task: build the CRUD routes for weather records per section 2.1 of the brief.
 CREATE POST /api/records
 - Body: location string + startDate + endDate
 - Validate: dates are real, start is not after end, range is not absurd
-  (cap it, say 90 days), and the location resolves via geocode()
+  (cap it at 90 days), the range does not extend more than 16 days into the
+  future (Open-Meteo forecast limit — say so in the error message), and the
+  location resolves via geocode()
 - Fetch temperatures for that range and persist location + range + results
 
 READ
@@ -263,8 +268,9 @@ Context: CRUD and error handling done.
 
 Task: implement section 2.3, data export.
 
-GET /api/records/export/:format where format is json, csv, markdown, xml, or pdf.
-Optionally accepts ?id= to export a single record.
+GET /api/export/:format where format is json, csv, markdown, xml, or pdf.
+Optionally accepts ?id= to export a single record. The route lives OUTSIDE
+/api/records so it can never collide with GET /api/records/:id.
 
 - Build the formatters in backend/src/utils/exporters.js, one function per format
 - Set correct Content-Type and Content-Disposition so the browser downloads

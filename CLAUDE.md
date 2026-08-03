@@ -5,6 +5,10 @@ assessment. The full requirements are in `docs/ASSESSMENT.md`. Read them before
 making architectural decisions. This is a DUAL ROLE submission: it must satisfy
 both Tech Assessment #1 (frontend) and Tech Assessment #2 (backend).
 
+The approved architecture plan — schema, endpoint list, and settled design
+decisions — is in `docs/PLAN.md`. Later phases refer to it as "the agreed
+schema/plan". Follow it; raise it with me before deviating.
+
 ## Stack (do not change without asking me)
 
 - Backend: Node.js + Express, ESM modules (`"type": "module"`)
