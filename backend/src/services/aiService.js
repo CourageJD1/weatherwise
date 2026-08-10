@@ -142,10 +142,16 @@ function parseInsights(text) {
     .replace(/```\s*$/, '')
     .trim();
 
+  // The typeof check also covers valid-but-useless JSON like null, an array,
+  // or a bare string — anything we can't read fields off falls back the same
+  // way as unparseable text (typeof null is "object", hence the extra check).
   let parsed;
   try {
     parsed = JSON.parse(cleaned);
   } catch {
+    parsed = null;
+  }
+  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
     return { summary: cleaned, clothingAdvice: null, travelTips: [], warnings: [] };
   }
 
