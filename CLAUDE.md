@@ -58,4 +58,7 @@ weatherwise/
 - Errors thrown from services should be typed so route handlers can map them to
   the right HTTP status code.
 - Dates stored and compared as `YYYY-MM-DD`.
-- Temperatures stored in Celsius, converted for display only.
+- Temperatures stored and displayed in Celsius. (This previously read
+  "converted for display only", which described a unit conversion that was
+  never built. If a °C/°F toggle is added later, convert at the display layer
+  only — never change what is stored.)

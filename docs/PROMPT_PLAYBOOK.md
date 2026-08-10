@@ -93,7 +93,8 @@ docs/
 - Errors thrown from services should be typed so route handlers can map them to
   the right HTTP status code.
 - Dates stored and compared as `YYYY-MM-DD`.
-- Temperatures stored in Celsius, converted for display only.
+- Temperatures stored and displayed in Celsius. If a unit toggle is ever added,
+  convert at the display layer only — never change what is stored.
 ```
 
 ---
@@ -701,6 +702,13 @@ Task: a final polish pass. No new features.
 Then screenshot the app at 375px, 768px and 1440px and tell me honestly what still
 looks unfinished.
 ```
+
+Also parked here, from the Phase 15 review (10 August): a **°C/°F toggle**.
+Not a brief requirement, so it was deliberately deferred rather than built
+before recording — it would touch CurrentConditions, Forecast and RecordDetail
+at the worst possible moment. Worth doing afterwards, since PM Accelerator is
+US-based and a Fahrenheit-native reviewer reads Celsius less fluently. Convert
+at the display layer only; Celsius stays the stored unit.
 
 ## Two things that will bite you
 
