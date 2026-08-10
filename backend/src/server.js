@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import { initSchema } from './db/schema.js';
 import recordsRouter from './routes/records.js';
+import exportRouter from './routes/export.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 dotenv.config();
@@ -25,6 +26,7 @@ app.get('/api/health', (req, res) => {
 });
 
 app.use('/api/records', recordsRouter);
+app.use('/api/export', exportRouter);
 
 // Must be registered after all routes so thrown/next()ed errors land here.
 app.use(errorHandler);

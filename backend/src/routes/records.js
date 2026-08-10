@@ -38,9 +38,17 @@ function toRecord(row) {
   };
 }
 
-async function findRecord(id) {
+// Exported for the export routes, which need the same rows in the same
+// API shape without duplicating the SELECT.
+export async function findRecord(id) {
   const [rows] = await pool.query(`${SELECT_RECORD} WHERE id = ?`, [id]);
   return rows.length ? toRecord(rows[0]) : null;
+}
+
+export async function listRecords() {
+  // id DESC as tiebreaker: same-second inserts still list newest first.
+  const [rows] = await pool.query(`${SELECT_RECORD} ORDER BY created_at DESC, id DESC`);
+  return rows.map(toRecord);
 }
 
 function recordNotFound(res, id) {
@@ -75,9 +83,7 @@ router.post('/', validateRecordBody, async (req, res, next) => {
 
 router.get('/', async (req, res, next) => {
   try {
-    // id DESC as tiebreaker: same-second inserts still list newest first.
-    const [rows] = await pool.query(`${SELECT_RECORD} ORDER BY created_at DESC, id DESC`);
-    res.json({ success: true, data: rows.map(toRecord), error: null });
+    res.json({ success: true, data: await listRecords(), error: null });
   } catch (err) {
     next(err);
   }
