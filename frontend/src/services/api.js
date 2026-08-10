@@ -34,3 +34,13 @@ export function fetchCurrentByQuery(query) {
 export function fetchCurrentByCoords(lat, lon) {
   return request(`/api/weather/current?lat=${lat}&lon=${lon}`);
 }
+
+// 5-day forecast; resolves to { location, forecast }. Query/coords variants
+// mirror the current-conditions pair above.
+export function fetchForecastByQuery(query) {
+  return request(`/api/weather/forecast?location=${encodeURIComponent(query)}`);
+}
+
+export function fetchForecastByCoords(lat, lon) {
+  return request(`/api/weather/forecast?lat=${lat}&lon=${lon}`);
+}

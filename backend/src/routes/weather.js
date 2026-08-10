@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { geocode, getCurrent } from '../services/weatherService.js';
+import { geocode, getCurrent, getForecast } from '../services/weatherService.js';
 import { ValidationError } from '../services/errors.js';
 
 // Ephemeral weather lookups for the search box (plan: /api/weather/* serves
@@ -50,6 +50,16 @@ router.get('/current', async (req, res, next) => {
     const loc = await resolveQueryLocation(req.query);
     const current = await getCurrent(loc.lat, loc.lon);
     res.json({ success: true, data: { location: loc, current }, error: null });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/forecast', async (req, res, next) => {
+  try {
+    const loc = await resolveQueryLocation(req.query);
+    const forecast = await getForecast(loc.lat, loc.lon);
+    res.json({ success: true, data: { location: loc, forecast }, error: null });
   } catch (err) {
     next(err);
   }

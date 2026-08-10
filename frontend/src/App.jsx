@@ -1,7 +1,13 @@
 import { useState } from 'react';
 import SearchBar from './components/SearchBar.jsx';
 import CurrentConditions from './components/CurrentConditions.jsx';
-import { fetchCurrentByQuery, fetchCurrentByCoords } from './services/api.js';
+import Forecast from './components/Forecast.jsx';
+import {
+  fetchCurrentByQuery,
+  fetchCurrentByCoords,
+  fetchForecastByQuery,
+  fetchForecastByCoords,
+} from './services/api.js';
 
 // Wraps the callback-based Geolocation API in a promise and normalizes its
 // failure modes into user-facing messages (most importantly a clear one for
@@ -31,15 +37,20 @@ function App() {
   // 'success' | 'error'. Every request path funnels through runLookup so
   // loading/error handling can never be forgotten on a new code path.
   const [status, setStatus] = useState('idle');
-  const [result, setResult] = useState(null); // { title, location, current }
+  const [result, setResult] = useState(null); // { title, location, current, forecast }
   const [error, setError] = useState(null);
 
-  async function runLookup(promise, title) {
+  // Current conditions and the 5-day forecast are separate backend endpoints;
+  // fetch them in parallel and show one combined result (or one error).
+  async function runLookup(currentPromise, forecastPromise, title) {
     setStatus('loading');
     setError(null);
     try {
-      const data = await promise;
-      setResult({ title, ...data });
+      const [{ location, current }, { forecast }] = await Promise.all([
+        currentPromise,
+        forecastPromise,
+      ]);
+      setResult({ title, location, current, forecast });
       setStatus('success');
     } catch (err) {
       setError(err.message);
@@ -48,7 +59,8 @@ function App() {
   }
 
   function handleSearch(query) {
-    runLookup(fetchCurrentByQuery(query), null); // null title -> show geocoded name
+    // null title -> show geocoded name
+    runLookup(fetchCurrentByQuery(query), fetchForecastByQuery(query), null);
   }
 
   async function handleUseMyLocation() {
@@ -56,7 +68,11 @@ function App() {
     setError(null);
     try {
       const { latitude, longitude } = await getBrowserPosition();
-      await runLookup(fetchCurrentByCoords(latitude, longitude), 'Your location');
+      await runLookup(
+        fetchCurrentByCoords(latitude, longitude),
+        fetchForecastByCoords(latitude, longitude),
+        'Your location'
+      );
     } catch (err) {
       setError(err.message);
       setStatus('error');
@@ -65,7 +81,9 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-100 to-slate-100 px-4 py-8 sm:py-12">
-      <main className="mx-auto w-full max-w-2xl space-y-6">
+      {/* One column capped at 42rem until lg, where the cap widens to 56rem so
+          the forecast's five-across row gets usable card widths. */}
+      <main className="mx-auto w-full max-w-2xl space-y-6 lg:max-w-4xl">
         <header className="text-center">
           <h1 className="text-3xl font-bold text-slate-800 sm:text-4xl">WeatherWise</h1>
           <p className="mt-1 text-sm text-slate-500">
@@ -99,11 +117,14 @@ function App() {
         )}
 
         {status === 'success' && (
-          <CurrentConditions
-            title={result.title}
-            location={result.location}
-            current={result.current}
-          />
+          <>
+            <CurrentConditions
+              title={result.title}
+              location={result.location}
+              current={result.current}
+            />
+            <Forecast forecast={result.forecast} />
+          </>
         )}
 
         {status === 'idle' && (
