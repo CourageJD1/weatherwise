@@ -15,6 +15,10 @@ const ARCHIVE_LAG_DAYS = 6;
 // Matches coordinate-shaped input like "40.7,-74.0" (plan decision 4).
 const COORD_REGEX = /^\s*(-?\d{1,3}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)\s*$/;
 
+// Abort outbound calls that hang, so a stalled upstream can't stall our
+// request handlers. Open-Meteo normally answers in well under a second.
+const UPSTREAM_TIMEOUT_MS = 10_000;
+
 /* ---------------------------------- helpers --------------------------------- */
 
 // All Open-Meteo calls go through here so network failures and API error
@@ -23,14 +27,28 @@ async function fetchJson(baseUrl, params) {
   const url = `${baseUrl}?${new URLSearchParams(params)}`;
   let res;
   try {
-    res = await fetch(url);
+    res = await fetch(url, { signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS) });
   } catch (cause) {
-    throw new UpstreamApiError(`Could not reach Open-Meteo: ${cause.message}`);
+    // Client-facing message stays generic; the underlying cause travels on
+    // the error for the middleware to log server-side.
+    const message =
+      cause.name === 'TimeoutError'
+        ? `Open-Meteo did not respond within ${UPSTREAM_TIMEOUT_MS / 1000} seconds.`
+        : 'Could not reach Open-Meteo.';
+    throw new UpstreamApiError(message, { cause });
   }
   let body = null;
   try {
     body = await res.json();
-  } catch {
+  } catch (cause) {
+    // The timeout can also fire mid-body-read; surface that as the same 502
+    // instead of falling through with a null body.
+    if (cause.name === 'TimeoutError' || cause.name === 'AbortError') {
+      throw new UpstreamApiError(
+        `Open-Meteo did not respond within ${UPSTREAM_TIMEOUT_MS / 1000} seconds.`,
+        { cause }
+      );
+    }
     // Non-JSON body; fall through to the status check below.
   }
   if (!res.ok || body?.error) {

@@ -20,6 +20,9 @@ export function errorHandler(err, req, res, next) {
     return res.status(404).json({ success: false, data: null, error: err.message });
   }
   if (err instanceof UpstreamApiError) {
+    // The client gets the clean message; the underlying cause (DNS failure,
+    // timeout, upstream error body) is only ever logged here.
+    console.error('Upstream API failure:', err.cause ?? err.message);
     return res.status(502).json({ success: false, data: null, error: err.message });
   }
 

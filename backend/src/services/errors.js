@@ -22,8 +22,10 @@ export class LocationNotFoundError extends Error {
 }
 
 export class UpstreamApiError extends Error {
-  constructor(message) {
-    super(message);
+  // options.cause (standard Error option) carries the original network
+  // error for server-side logging; the message alone goes to the client.
+  constructor(message, options) {
+    super(message, options);
     this.name = 'UpstreamApiError';
   }
 }
