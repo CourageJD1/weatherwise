@@ -61,8 +61,10 @@ export function toCsv(records) {
   for (const row of toDayRows(records)) {
     lines.push(DAY_COLUMNS.map((col) => csvField(row[col])).join(','));
   }
-  // CRLF line endings per RFC 4180; Excel is happiest with them too.
-  return lines.join('\r\n') + '\r\n';
+  // Leading BOM so Excel detects UTF-8 on double-click; without it,
+  // accented location names ("Zürich") garble. CRLF line endings per
+  // RFC 4180; Excel is happiest with those too.
+  return '\ufeff' + lines.join('\r\n') + '\r\n';
 }
 
 /* -------------------------------- Markdown --------------------------------- */
