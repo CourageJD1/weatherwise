@@ -137,12 +137,20 @@ export async function getCurrent(lat, lon) {
       'wind_gusts_10m',
       'is_day',
     ].join(','),
+    // Today's sunrise/sunset ride along on the same request. With
+    // timezone=auto these come back as ISO strings already in the
+    // LOCATION's local time, so the frontend displays them verbatim —
+    // no browser-timezone conversion that could shift them.
+    daily: 'sunrise,sunset',
+    forecast_days: 1,
     timezone: 'auto',
   });
   const c = data.current;
   return {
     time: c.time,
     timezone: data.timezone,
+    sunrise: data.daily.sunrise[0],
+    sunset: data.daily.sunset[0],
     temperature: c.temperature_2m,
     apparentTemperature: c.apparent_temperature,
     humidity: c.relative_humidity_2m,

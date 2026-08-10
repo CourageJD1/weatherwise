@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import { initSchema } from './db/schema.js';
+import weatherRouter from './routes/weather.js';
 import recordsRouter from './routes/records.js';
 import exportRouter from './routes/export.js';
 import insightsRouter from './routes/insights.js';
@@ -27,6 +28,7 @@ app.get('/api/health', (req, res) => {
   res.json({ success: true, data: { status: 'ok' }, error: null });
 });
 
+app.use('/api/weather', weatherRouter);
 app.use('/api/records', recordsRouter);
 app.use('/api/export', exportRouter);
 app.use('/api/insights', insightsRouter);
