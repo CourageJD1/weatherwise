@@ -465,7 +465,258 @@ That last one is the highest-value prompt in this document.
 
 ---
 
-## Suggested pacing (9 days remaining)
+# THE VISUAL OVERHAUL
+
+Added 10 August 2026. Optional upside, not scored baseline — the brief says
+"NO NEED to make the UI beautiful… However, if you want to make it nice, feel
+free to do it. It's nice to have." Everything below is therefore sequenced so a
+submittable build is never at risk.
+
+Three tiers, ordered by payoff per hour and by risk. Do them in order. Each is a
+separate Claude Code prompt on the `visual` branch, with a commit between each.
+
+## Before you touch anything
+
+```
+git checkout main
+git tag submission-safe
+git push --tags
+git checkout -b visual
+```
+
+`submission-safe` is the escape hatch. If the globe eats the machine at 11pm the
+night before submission, `git checkout main` gets back to a working app
+instantly. Only tag a `main` that has passed Phase 15, or the escape hatch may
+itself be broken.
+
+Merge to `main` only when it runs cleanly.
+
+## The design direction
+
+Innovative but still easy to use means **spending all the boldness in one place**
+and keeping everything around it disciplined. The globe is the bold thing.
+Therefore the panels, type, and controls stay quiet, or the screen becomes noise
+and the reviewer cannot find the temperature.
+
+### Palette
+
+Not a fixed palette. The palette is **derived from the weather**, which is the
+actual innovation and the thing that makes it feel alive rather than skinned.
+
+Six CSS custom properties, re-set whenever conditions change, with a slow
+transition:
+
+```
+--surface        deep base, the "atmosphere"
+--surface-raised panel background, semi-transparent
+--ink            primary text
+--ink-muted      secondary text
+--accent         condition-driven highlight
+--glow           the light source colour behind the globe
+```
+
+| Condition | surface | accent | feel |
+| --- | --- | --- | --- |
+| Clear day | `#1B3A4B` | `#F2C14E` | high sun, warm light |
+| Clear night | `#101826` | `#7FA8D9` | cold moonlight |
+| Rain | `#1E2A32` | `#6FB1C4` | wet slate |
+| Snow | `#243040` | `#D6E4F0` | flat blue-grey |
+| Storm | `#161B26` | `#8C7AE6` | bruised violet |
+| Fog | `#2A2F33` | `#A9B4BA` | desaturated, low contrast |
+
+Base surface stays dark across all of them so the globe reads and text contrast
+is never in question. Only the accent and glow swing hard.
+
+Avoid the cream-and-terracotta look and the near-black-with-acid-green look.
+Both are what every AI-generated interface currently looks like, and a reviewer
+who has seen forty submissions will clock it.
+
+### Type
+
+- **Display:** Bricolage Grotesque. Variable width, real character, free on
+  Google Fonts. Used only for the temperature and the location name.
+- **Body:** Public Sans or Figtree. Quiet, readable over a moving background.
+- **Data:** IBM Plex Mono, tabular figures, for humidity, wind, pressure,
+  sunrise and sunset.
+
+The mono for readouts is the deliberate choice worth defending in the video: a
+weather app is an **instrument**, and instruments show numbers in fixed-width so
+they do not jitter as values change. That is a real reason, not decoration.
+
+### Signature
+
+The globe. One memorable element, executed properly.
+
+## Tier A: design system and weather-driven colour
+
+Highest payoff per hour, zero risk, no new dependencies. If only one tier gets
+done, do this one.
+
+```
+Context: the app is functionally complete through Phase 14. I now want to improve
+the visual design. Nothing about the backend, API contracts, or data flow should
+change.
+
+Task: build a design system layer.
+
+1. Add the fonts: Bricolage Grotesque (display), Public Sans (body), IBM Plex Mono
+   (numeric readouts). Load them properly, not with a render-blocking import.
+
+2. Create a theme module that maps a weather condition code plus is-day into a set
+   of CSS custom properties: --surface, --surface-raised, --ink, --ink-muted,
+   --accent, --glow. Use the preset table in the design direction above.
+
+3. Apply the theme at the root element whenever the displayed weather changes, with
+   a 700ms ease transition on the colour properties so it fades rather than snaps.
+
+4. Restyle the existing panels as raised surfaces: subtle backdrop blur, 1px border
+   at low opacity, generous internal padding, consistent corner radius. Set a real
+   type scale. Temperature in the display face at a large size, readouts in the mono
+   face with tabular figures.
+
+5. Verify contrast: all text must hit at least 4.5:1 against its background in every
+   one of the six conditions.
+
+Constraints: Tailwind plus CSS custom properties. No new component libraries. Do not
+change any component's props or behaviour, only its presentation. Do not touch the
+records table, exports, or the AI panel logic.
+
+Done when: searching a rainy city and then a clear city visibly shifts the whole
+palette, and every reading stays legible in both.
+```
+
+## Tier B: weather-reactive animation
+
+Medium effort, high visual impact, moderate risk. This is the "rain droplets on
+the screen" part.
+
+```
+Context: Tier A is merged. Theme tokens exist.
+
+Task: add an ambient weather animation layer.
+
+1. Create a full-viewport canvas layer sitting behind the UI panels and above the
+   background, with pointer-events: none.
+
+2. Implement particle systems driven by the current condition:
+   - rain: fine vertical streaks, angle and density scaled by wind speed and
+     precipitation intensity
+   - snow: slower, drifting, varied sizes
+   - fog: a few large soft drifting shapes at very low opacity
+   - clear day: sparse slow-moving dust motes catching the light
+   - clear night: a faint starfield with occasional twinkle
+   - storm: rain plus an occasional full-screen flash at random intervals of 8 to 20
+     seconds
+
+3. Animate the condition icons themselves in SVG with CSS, matching the layer: falling
+   droplets on the rain icon, drifting flakes on snow, a slow rotation on the sun.
+
+4. Cross-fade between particle systems over about 1 second when the condition changes.
+   Never hard-cut.
+
+Hard requirements:
+- Respect prefers-reduced-motion: if set, render a single static frame and stop.
+- Pause the animation loop when document.hidden is true.
+- Cap particle count and scale it down on small viewports.
+- Use requestAnimationFrame with a delta-time step so speed is frame-rate independent.
+- The layer must never intercept clicks or block scrolling.
+
+Constraints: plain canvas 2D and SVG. No animation libraries. Keep the particle logic
+in one file with the tunable values as named constants at the top, so I can explain
+them.
+
+Done when: rain visibly falls behind the UI during rain, it snows during snow, the
+whole thing stops for reduced-motion, and I can still click every control.
+```
+
+## Tier C: the globe
+
+Biggest effort, biggest risk, highest ceiling. **Adds npm dependencies** —
+`@react-three/fiber` and `@react-three/drei` — which the `CLAUDE.md` hard rule
+says must be approved before installing.
+
+```
+Context: Tiers A and B are merged.
+
+Task: replace the static background with an interactive 3D globe.
+
+1. Add @react-three/fiber and @react-three/drei. Render a sphere with an
+   equirectangular earth texture, positioned so it occupies the background with the UI
+   panels floating above it.
+
+2. Idle behaviour: the globe rotates slowly and continuously. Cursor position applies a
+   gentle parallax tilt, damped so it eases rather than tracking rigidly. Cursor drag
+   rotates it directly with inertia on release.
+
+3. On location select: animate the globe so the chosen latitude and longitude rotates
+   to face the camera. Ease over roughly 1.5 seconds. Drop a subtle marker at that
+   point. The camera should pull in slightly during the move and settle back.
+
+4. Lighting: a directional light positioned from the real sub-solar point for the
+   current UTC time, so the day/night terminator on the globe is actually correct.
+   Tint the light using the --glow theme token.
+
+5. Atmosphere: a thin rim glow around the sphere edge in the accent colour.
+
+Hard requirements:
+- Lazy-load the whole 3D bundle so first paint is not blocked.
+- Detect WebGL support. If absent, fall back to a static gradient background using the
+  theme tokens. The app must never break.
+- Respect prefers-reduced-motion: no idle rotation, no cursor parallax, jump directly
+  to the selected location.
+- Cap the device pixel ratio at 2 and pause rendering when the tab is hidden.
+- Target 60fps on a mid-range laptop. If a texture is heavy, compress it.
+
+Constraints: keep all 3D code inside components/globe/. Do not entangle it with the
+weather data layer beyond passing in lat, lon, and theme tokens as props.
+
+Done when: I search Tokyo, the globe swings around to Japan and settles, and the app
+still works with WebGL disabled in devtools.
+```
+
+The day/night terminator in step 4 is the detail that will make a technical
+reviewer sit up, because it means the astronomy was actually thought about
+rather than a globe component pasted in. It is also the part most likely to be
+subtly wrong. Test it against a known sunrise time before trusting it.
+
+If the globe fights back, ship Tiers A and B. A beautifully coloured, animated,
+correctly built app beats a broken globe by a wide margin.
+
+## Tier D: polish pass, if time remains
+
+```
+Task: a final polish pass. No new features.
+
+- Page-load sequence: panels stagger in over about 400ms total rather than all
+  appearing at once.
+- Hover states on every interactive element, consistent timing across all of them.
+- Number transitions: temperature counts up to its new value rather than snapping.
+- Skeleton loading states shaped like the content they replace, not spinners.
+- Empty state for the records view that invites the first action rather than saying
+  "no data".
+- Visible keyboard focus rings on everything focusable. Check the whole flow with Tab.
+- Rewrite every error message to say what happened and what to do next, in the app's
+  voice.
+
+Then screenshot the app at 375px, 768px and 1440px and tell me honestly what still
+looks unfinished.
+```
+
+## Two things that will bite you
+
+**Recording.** Screen recorders and a 3D globe compete for the same GPU. The demo
+video may stutter even though the app is smooth. Close everything else, record at
+1080p rather than higher, and do a fifteen-second test recording before the real
+take.
+
+**The reviewer's machine.** You do not know what they will run this on. That is
+what the WebGL fallback and the reduced-motion path are for, and both are worth a
+sentence in the README. Saying graceful degradation was handled is itself a
+technical signal.
+
+---
+
+## Original pacing (as planned on 29 July, 9 days remaining)
 
 | Day | Phases                           |
 | --- | -------------------------------- |
@@ -480,6 +731,24 @@ That last one is the highest-value prompt in this document.
 | 9   | 16, record video, submit         |
 
 Build in a buffer. Do not plan to submit on the final day.
+
+## Revised pacing (from 10 August, 2 days remaining)
+
+Phases 0–14 are done and pushed. Due on or before **12 August**, so there are
+roughly two working days left and the visual overhaul now competes directly with
+Phase 15, Phase 16, and the recording.
+
+| Remaining time | Work | Droppable? |
+| --- | --- | --- |
+| First | Phase 15 self-review, fix what it surfaces, tag `submission-safe` | No — this is what makes the build submittable |
+| Then | Tier A (design system, weather-driven colour) | Yes, but cheapest win of the four |
+| Then | Phase 16 + record video + paste URL in README + submit | **No — the video is a hard requirement** |
+| Only if time genuinely remains | Tier B, then Tier C, then Tier D | Yes, all of them |
+
+The ordering constraint that matters: **Phase 16 and the recording are not
+optional and cannot be compressed**, because the brief requires a 1–2 minute
+video explaining both the code and the output. Every tier is optional. If the
+tiers eat the recording slot, the submission is worse, not better.
 
 ---
 
@@ -506,3 +775,11 @@ Build in a buffer. Do not plan to submit on the final day.
 - [ ] Video URL viewable by anyone, and pasted in the README
 - [ ] Google form submitted, stating clearly that both assessments were completed
 - [ ] No `.env` in the commit history
+
+If any visual tier shipped, also:
+
+- [ ] `visual` branch merged into `main`, and `main` still runs from a clean clone
+- [ ] README notes the WebGL fallback and the `prefers-reduced-motion` path, since
+      graceful degradation is itself a technical signal
+- [ ] App re-checked in the browser after the merge — the smoke driver only covers
+      the backend and will stay green through a broken frontend
