@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { themeFor, applyTheme } from './utils/theme.js';
 import SearchBar from './components/SearchBar.jsx';
 import CurrentConditions from './components/CurrentConditions.jsx';
 import Forecast from './components/Forecast.jsx';
@@ -44,8 +45,8 @@ function ViewTab({ active, onClick, children }) {
       aria-pressed={active}
       className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors
         ${active
-          ? 'bg-sky-600 text-white shadow-sm'
-          : 'text-slate-600 hover:bg-white hover:text-slate-800'}`}
+          ? 'bg-[var(--accent)] text-[var(--surface)] shadow-sm'
+          : 'text-[var(--ink-muted)] hover:bg-[color-mix(in_srgb,var(--ink)_10%,transparent)] hover:text-[var(--ink)]'}`}
     >
       {children}
     </button>
@@ -63,6 +64,15 @@ function App() {
   const [status, setStatus] = useState('idle');
   const [result, setResult] = useState(null); // { title, location, current, forecast }
   const [error, setError] = useState(null);
+
+  // The palette follows whatever weather is on screen. Runs on the successful
+  // result only, so a failed lookup leaves the previous conditions in place
+  // rather than flashing the screen back to a default.
+  useEffect(() => {
+    if (result?.current) {
+      applyTheme(themeFor(result.current.weatherCode, result.current.isDay));
+    }
+  }, [result]);
 
   // Current conditions and the 5-day forecast are separate backend endpoints;
   // fetch them in parallel and show one combined result (or one error).
@@ -104,18 +114,24 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-100 to-slate-100 px-4 py-8 sm:py-12">
+    <div className="min-h-screen px-4 py-8 sm:py-12">
       {/* One column capped at 42rem until lg, where the cap widens to 56rem so
           the forecast's five-across row gets usable card widths. */}
       <main className="mx-auto w-full max-w-2xl space-y-6 lg:max-w-4xl">
         <header className="text-center">
-          <h1 className="text-3xl font-bold text-slate-800 sm:text-4xl">WeatherWise</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="display text-4xl font-extrabold text-[var(--ink)] sm:text-5xl">
+            WeatherWise
+          </h1>
+          <p className="mt-1 text-sm text-[var(--ink-muted)]">
             Live conditions for any city, postal code, landmark, or coordinates
           </p>
         </header>
 
-        <nav className="flex justify-center gap-1 rounded-xl bg-slate-200/60 p-1" aria-label="Main views">
+        <nav
+          className="flex justify-center gap-1 rounded-xl p-1
+                     bg-[color-mix(in_srgb,var(--ink)_8%,transparent)]"
+          aria-label="Main views"
+        >
           <ViewTab active={view === 'weather'} onClick={() => setView('weather')}>
             Weather
           </ViewTab>
@@ -136,11 +152,11 @@ function App() {
 
             {status === 'loading' && (
               <div
-                className="flex items-center justify-center gap-3 py-10 text-slate-600"
+                className="flex items-center justify-center gap-3 py-10 text-[var(--ink-muted)]"
                 role="status"
               >
                 <span
-                  className="h-6 w-6 animate-spin rounded-full border-2 border-sky-500 border-t-transparent"
+                  className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--accent)] border-t-transparent"
                   aria-hidden="true"
                 />
                 Fetching weather…
@@ -150,7 +166,8 @@ function App() {
             {status === 'error' && (
               <div
                 role="alert"
-                className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+                className="rounded-xl border border-red-400/40 bg-red-500/10 px-4 py-3
+                           text-sm text-red-200"
               >
                 {error}
               </div>
@@ -168,7 +185,7 @@ function App() {
             )}
 
             {status === 'idle' && (
-              <p className="py-10 text-center text-sm text-slate-400">
+              <p className="py-10 text-center text-sm text-[var(--ink-muted)]">
                 Search for a place or use your location to see current conditions.
               </p>
             )}

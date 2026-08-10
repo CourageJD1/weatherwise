@@ -21,11 +21,15 @@ function localClockTime(isoLocal) {
 
 function Stat({ label, value, detail }) {
   return (
-    <div className="rounded-lg bg-slate-50 p-3">
-      <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</dt>
-      <dd className="mt-1 text-lg font-semibold text-slate-800">
+    <div className="panel-inset p-3">
+      <dt className="text-xs font-medium uppercase tracking-wide text-[var(--ink-muted)]">
+        {label}
+      </dt>
+      <dd className="readout mt-1 text-lg font-semibold text-[var(--ink)]">
         {value}
-        {detail && <span className="ml-1 text-sm font-normal text-slate-500">{detail}</span>}
+        {detail && (
+          <span className="ml-1 text-sm font-normal text-[var(--ink-muted)]">{detail}</span>
+        )}
       </dd>
     </div>
   );
@@ -36,10 +40,12 @@ function CurrentConditions({ title, location, current }) {
   const subtitle = [location.admin1, location.country].filter(Boolean).join(', ');
 
   return (
-    <section className="rounded-2xl bg-white p-5 shadow-md sm:p-6">
+    <section className="panel p-5 sm:p-6">
       <header>
-        <h2 className="text-xl font-bold text-slate-800 sm:text-2xl">{title ?? location.name}</h2>
-        {subtitle && <p className="text-sm text-slate-500">{subtitle}</p>}
+        <h2 className="display text-2xl font-bold text-[var(--ink)] sm:text-3xl">
+          {title ?? location.name}
+        </h2>
+        {subtitle && <p className="text-sm text-[var(--ink-muted)]">{subtitle}</p>}
       </header>
 
       {/* Hero row: icon, temperature, condition */}
@@ -48,11 +54,13 @@ function CurrentConditions({ title, location, current }) {
           {icon}
         </span>
         <div>
-          <p className="text-4xl font-bold text-slate-900 sm:text-5xl">
-            {Math.round(current.temperature)}°C
+          <p className="display text-6xl font-extrabold text-[var(--ink)] sm:text-7xl">
+            {Math.round(current.temperature)}°
+            <span className="text-3xl font-semibold text-[var(--ink-muted)] sm:text-4xl">C</span>
           </p>
-          <p className="text-sm text-slate-600">
-            {label} · Feels like {Math.round(current.apparentTemperature)}°C
+          <p className="text-sm text-[var(--ink-muted)]">
+            {label} · Feels like{' '}
+            <span className="readout">{Math.round(current.apparentTemperature)}°C</span>
           </p>
         </div>
       </div>
@@ -68,7 +76,7 @@ function CurrentConditions({ title, location, current }) {
         <Stat label="Sunset" value={localClockTime(current.sunset)} />
       </dl>
 
-      <p className="mt-3 text-xs text-slate-400">
+      <p className="mt-3 text-xs text-[var(--ink-muted)] opacity-80">
         Sunrise/sunset shown in the location&apos;s timezone ({current.timezone}).
       </p>
     </section>

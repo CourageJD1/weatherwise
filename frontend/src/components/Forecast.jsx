@@ -23,26 +23,26 @@ function DayCard({ day }) {
 
   return (
     <li
-      className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 px-4 py-3
+      className="panel-inset flex items-center justify-between gap-3 px-4 py-3
                  lg:flex-col lg:justify-start lg:gap-1.5 lg:py-4 lg:text-center"
     >
       <div className="w-16 lg:w-auto">
-        <p className="text-sm font-semibold text-slate-800">{weekday}</p>
-        <p className="text-xs text-slate-500">{date}</p>
+        <p className="text-sm font-semibold text-[var(--ink)]">{weekday}</p>
+        <p className="readout text-xs text-[var(--ink-muted)]">{date}</p>
       </div>
 
       <span className="text-3xl" role="img" aria-label={label} title={label}>
         {icon}
       </span>
 
-      <p className="text-sm text-slate-800">
+      <p className="readout text-sm text-[var(--ink)]">
         <span className="font-semibold">{Math.round(day.tempMax)}°</span>
-        <span className="mx-1 text-slate-400" aria-hidden="true">/</span>
-        <span className="text-slate-500">{Math.round(day.tempMin)}°</span>
+        <span className="mx-1 text-[var(--ink-muted)]" aria-hidden="true">/</span>
+        <span className="text-[var(--ink-muted)]">{Math.round(day.tempMin)}°</span>
       </p>
 
       {/* precipitationProbability is null for past days (observed, not predicted) */}
-      <p className="w-14 text-right text-sm text-sky-700 lg:w-auto lg:text-center">
+      <p className="readout w-14 text-right text-sm text-[var(--accent)] lg:w-auto lg:text-center">
         <span aria-hidden="true">💧</span>{' '}
         {day.precipitationProbability != null ? `${day.precipitationProbability}%` : '—'}
         <span className="sr-only">{' chance of precipitation'}</span>
@@ -53,9 +53,11 @@ function DayCard({ day }) {
 
 function Forecast({ forecast }) {
   return (
-    <section className="rounded-2xl bg-white p-5 shadow-md sm:p-6">
-      <h2 className="text-lg font-bold text-slate-800">5-Day Forecast</h2>
-      <p className="text-xs text-slate-500">High / low in °C with chance of precipitation</p>
+    <section className="panel p-5 sm:p-6">
+      <h2 className="text-lg font-bold text-[var(--ink)]">5-Day Forecast</h2>
+      <p className="text-xs text-[var(--ink-muted)]">
+        High / low in °C with chance of precipitation
+      </p>
 
       <ul className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-5">
         {forecast.map((day) => (

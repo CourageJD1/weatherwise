@@ -4,6 +4,26 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>WeatherWise</title>
+
+    <!--
+      Fonts are loaded here rather than with an @import in CSS. An @import
+      inside the stylesheet serialises the requests — the browser must fetch
+      and parse our CSS before it even discovers the font CSS — which delays
+      first paint. A <link> is discovered in the initial HTML scan, the
+      preconnects warm up the TLS handshake to both Google Fonts hosts in
+      parallel, and display=swap paints text in a fallback face immediately
+      and swaps when the webfont lands, so text is never invisible.
+
+      Three faces, three jobs: Bricolage Grotesque for display (temperature and
+      location only), Public Sans for body copy, IBM Plex Mono for numeric
+      readouts.
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=IBM+Plex+Mono:wght@400;500;600&family=Public+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <div id="root"></div>

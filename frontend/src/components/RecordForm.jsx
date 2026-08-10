@@ -68,18 +68,18 @@ function serverErrorField(message) {
 function FieldError({ message }) {
   if (!message) return null;
   return (
-    <p role="alert" className="mt-1 text-xs text-red-600">
+    <p role="alert" className="mt-1 text-xs text-red-300">
       {message}
     </p>
   );
 }
 
 const inputClass = (hasError) =>
-  `w-full rounded-lg border bg-white px-3 py-2 text-sm text-slate-800 shadow-sm
+  `w-full rounded-lg border bg-[var(--surface-raised)] px-3 py-2 text-sm text-[var(--ink)] shadow-sm
    focus:outline-none focus:ring-2 disabled:opacity-60
    ${hasError
      ? 'border-red-400 focus:border-red-500 focus:ring-red-200'
-     : 'border-slate-300 focus:border-sky-500 focus:ring-sky-200'}`;
+     : 'border-[color-mix(in_srgb,var(--ink)_22%,transparent)] focus:border-[var(--accent)] focus:ring-[var(--accent)]/40'}`;
 
 function RecordForm({ record, onSaved, onCancel }) {
   const editing = Boolean(record);
@@ -135,18 +135,18 @@ function RecordForm({ record, onSaved, onCancel }) {
   const maxDate = addDaysIso(todayIso(), MAX_FUTURE_DAYS);
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-2xl bg-white p-5 shadow-md sm:p-6" noValidate>
-      <h3 className="text-lg font-bold text-slate-800">
+    <form onSubmit={handleSubmit} className="panel p-5 sm:p-6" noValidate>
+      <h3 className="text-lg font-bold text-[var(--ink)]">
         {editing ? `Edit record #${record.id}` : 'Save a location & date range'}
       </h3>
-      <p className="mt-0.5 text-xs text-slate-500">
+      <p className="mt-0.5 text-xs text-[var(--ink-muted)]">
         Temperatures for the range are fetched and stored — up to {MAX_RANGE_DAYS} days,
         no further than {MAX_FUTURE_DAYS} days ahead.
       </p>
 
       <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="sm:col-span-2">
-          <label htmlFor="record-location" className="mb-1 block text-xs font-medium text-slate-600">
+          <label htmlFor="record-location" className="mb-1 block text-xs font-medium text-[var(--ink-muted)]">
             Location
           </label>
           <input
@@ -163,7 +163,7 @@ function RecordForm({ record, onSaved, onCancel }) {
         </div>
 
         <div>
-          <label htmlFor="record-start" className="mb-1 block text-xs font-medium text-slate-600">
+          <label htmlFor="record-start" className="mb-1 block text-xs font-medium text-[var(--ink-muted)]">
             Start date
           </label>
           <input
@@ -180,7 +180,7 @@ function RecordForm({ record, onSaved, onCancel }) {
         </div>
 
         <div>
-          <label htmlFor="record-end" className="mb-1 block text-xs font-medium text-slate-600">
+          <label htmlFor="record-end" className="mb-1 block text-xs font-medium text-[var(--ink-muted)]">
             End date
           </label>
           <input
@@ -200,7 +200,7 @@ function RecordForm({ record, onSaved, onCancel }) {
       {formError && (
         <div
           role="alert"
-          className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+          className="mt-3 rounded-lg border border-red-400/40 bg-red-500/10 px-3 py-2 text-sm text-red-200"
         >
           {formError}
         </div>
@@ -210,8 +210,8 @@ function RecordForm({ record, onSaved, onCancel }) {
         <button
           type="submit"
           disabled={busy}
-          className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm
-                     hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-300
+          className="rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[var(--surface)] shadow-sm
+                     hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/40
                      disabled:cursor-not-allowed disabled:opacity-50"
         >
           {busy ? 'Fetching weather…' : editing ? 'Save changes' : 'Create record'}
@@ -221,8 +221,8 @@ function RecordForm({ record, onSaved, onCancel }) {
             type="button"
             onClick={onCancel}
             disabled={busy}
-            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium
-                       text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+            className="rounded-lg border border-[color-mix(in_srgb,var(--ink)_22%,transparent)] bg-[var(--surface-raised)] px-4 py-2 text-sm font-medium
+                       text-[var(--ink)] hover:bg-[color-mix(in_srgb,var(--ink)_6%,transparent)] disabled:opacity-50"
           >
             Cancel
           </button>

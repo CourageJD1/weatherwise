@@ -31,22 +31,22 @@ function ExportButtons({ recordId, label }) {
   return (
     <div>
       <div className="flex flex-wrap items-center gap-2">
-        {label && <span className="text-xs font-medium text-slate-500">{label}</span>}
+        {label && <span className="text-xs font-medium text-[var(--ink-muted)]">{label}</span>}
         {FORMATS.map(({ format, label: name }) => (
           <button
             key={format}
             type="button"
             onClick={() => handleExport(format)}
             disabled={busyFormat !== null}
-            className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-medium
-                       text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-full border border-[color-mix(in_srgb,var(--ink)_22%,transparent)] bg-[var(--surface-raised)] px-3 py-1 text-xs font-medium
+                       text-[var(--ink)] hover:bg-[color-mix(in_srgb,var(--ink)_10%,transparent)] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {busyFormat === format ? 'Preparing…' : name}
           </button>
         ))}
       </div>
       {error && (
-        <p role="alert" className="mt-2 text-xs text-red-600">
+        <p role="alert" className="mt-2 text-xs text-red-300">
           {error}
         </p>
       )}

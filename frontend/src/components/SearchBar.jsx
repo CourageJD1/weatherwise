@@ -25,16 +25,16 @@ function SearchBar({ onSearch, onUseMyLocation, busy }) {
           onChange={(e) => setQuery(e.target.value)}
           disabled={busy}
           placeholder='City, postal code, or landmark — e.g. "Vacoas", "10001", "Eiffel Tower", "-20.32, 57.52"'
-          className="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-4 py-2.5
-                     text-sm text-slate-800 placeholder:text-slate-400 shadow-sm
-                     focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200
+          className="min-w-0 flex-1 rounded-lg border border-[color-mix(in_srgb,var(--ink)_22%,transparent)] bg-[var(--surface-raised)] px-4 py-2.5
+                     text-sm text-[var(--ink)] placeholder:text-[var(--ink-muted)] shadow-sm
+                     focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/40
                      disabled:opacity-60"
         />
         <button
           type="submit"
           disabled={busy || !query.trim()}
-          className="rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm
-                     hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-300
+          className="rounded-lg bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-[var(--surface)] shadow-sm
+                     hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/40
                      disabled:cursor-not-allowed disabled:opacity-50"
         >
           Search
@@ -44,9 +44,9 @@ function SearchBar({ onSearch, onUseMyLocation, busy }) {
         type="button"
         onClick={onUseMyLocation}
         disabled={busy}
-        className="flex items-center justify-center gap-1.5 rounded-lg border border-slate-300
-                   bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm
-                   hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-sky-200
+        className="flex items-center justify-center gap-1.5 rounded-lg border border-[color-mix(in_srgb,var(--ink)_22%,transparent)]
+                   bg-[var(--surface-raised)] px-4 py-2.5 text-sm font-medium text-[var(--ink)] shadow-sm
+                   hover:bg-[color-mix(in_srgb,var(--ink)_6%,transparent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/40
                    disabled:cursor-not-allowed disabled:opacity-50"
       >
         {/* crosshair "locate me" glyph */}

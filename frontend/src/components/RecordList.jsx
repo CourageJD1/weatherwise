@@ -11,17 +11,17 @@ function RecordRow({ record, selected, onSelect, onEdit, onDelete, deleting }) {
   return (
     <li
       className={`rounded-xl border px-4 py-3 transition-colors
-        ${selected ? 'border-sky-400 bg-sky-50' : 'border-slate-200 bg-slate-50'}`}
+        ${selected ? 'border-[var(--accent)] bg-[color-mix(in_srgb,var(--accent)_14%,transparent)]' : 'border-[color-mix(in_srgb,var(--ink)_14%,transparent)] bg-[color-mix(in_srgb,var(--ink)_6%,transparent)]'}`}
     >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         {/* The text block doubles as the "view" control; the explicit View
             button below exists so the affordance is discoverable. */}
         <button type="button" onClick={() => onSelect(record.id)} className="text-left">
-          <p className="text-sm font-semibold text-slate-800">
+          <p className="text-sm font-semibold text-[var(--ink)]">
             {place}
-            <span className="ml-2 font-normal text-slate-400">#{record.id}</span>
+            <span className="ml-2 font-normal text-[var(--ink-muted)]">#{record.id}</span>
           </p>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-[var(--ink-muted)]">
             {record.startDate} → {record.endDate} · {record.weatherData.length}{' '}
             {record.weatherData.length === 1 ? 'day' : 'days'} · saved as “{record.locationQuery}”
           </p>
@@ -31,16 +31,16 @@ function RecordRow({ record, selected, onSelect, onEdit, onDelete, deleting }) {
           <button
             type="button"
             onClick={() => onSelect(record.id)}
-            className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium
-                       text-slate-700 hover:bg-slate-100"
+            className="rounded-lg border border-[color-mix(in_srgb,var(--ink)_22%,transparent)] bg-[var(--surface-raised)] px-3 py-1.5 text-xs font-medium
+                       text-[var(--ink)] hover:bg-[color-mix(in_srgb,var(--ink)_10%,transparent)]"
           >
             {selected ? 'Viewing' : 'View'}
           </button>
           <button
             type="button"
             onClick={() => onEdit(record)}
-            className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium
-                       text-slate-700 hover:bg-slate-100"
+            className="rounded-lg border border-[color-mix(in_srgb,var(--ink)_22%,transparent)] bg-[var(--surface-raised)] px-3 py-1.5 text-xs font-medium
+                       text-[var(--ink)] hover:bg-[color-mix(in_srgb,var(--ink)_10%,transparent)]"
           >
             Edit
           </button>
@@ -59,8 +59,8 @@ function RecordRow({ record, selected, onSelect, onEdit, onDelete, deleting }) {
                 type="button"
                 onClick={() => setConfirming(false)}
                 disabled={deleting}
-                className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs
-                           font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+                className="rounded-lg border border-[color-mix(in_srgb,var(--ink)_22%,transparent)] bg-[var(--surface-raised)] px-3 py-1.5 text-xs
+                           font-medium text-[var(--ink)] hover:bg-[color-mix(in_srgb,var(--ink)_10%,transparent)] disabled:opacity-50"
               >
                 Keep
               </button>
@@ -69,8 +69,8 @@ function RecordRow({ record, selected, onSelect, onEdit, onDelete, deleting }) {
             <button
               type="button"
               onClick={() => setConfirming(true)}
-              className="rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-medium
-                         text-red-600 hover:bg-red-50"
+              className="rounded-lg border border-red-400/40 bg-[var(--surface-raised)] px-3 py-1.5 text-xs font-medium
+                         text-red-300 hover:bg-red-500/10"
             >
               Delete
             </button>
@@ -84,7 +84,7 @@ function RecordRow({ record, selected, onSelect, onEdit, onDelete, deleting }) {
 function RecordList({ records, selectedId, onSelect, onEdit, onDelete, deletingId }) {
   if (records.length === 0) {
     return (
-      <p className="py-6 text-center text-sm text-slate-400">
+      <p className="py-6 text-center text-sm text-[var(--ink-muted)]">
         No saved records yet — create one with the form above.
       </p>
     );

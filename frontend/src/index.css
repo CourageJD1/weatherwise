@@ -1,1 +1,129 @@
 @import 'tailwindcss';
+
+/*
+  The six theme tokens, defaulting to the clear-day preset (matching
+  THEMES.clearDay in src/utils/theme.js) — this is what shows before any
+  weather has loaded. applyTheme() overwrites these inline on <html>.
+
+  These are deliberately PLAIN custom properties, not @property-registered
+  ones. Registering them with syntax '<color>' and transitioning the tokens
+  directly looks tidier and would interpolate the variables themselves, but in
+  practice it froze them: with a transition declared on a registered property,
+  the inline value set from JS never reached the computed style and the palette
+  never moved at all. See the note below on why the crossfade was dropped too.
+*/
+:root {
+  --surface: #1b3a4b;
+  --surface-raised: rgba(255, 255, 255, 0.07);
+  --ink: #f5f9fb;
+  --ink-muted: #afc4ce;
+  --accent: #f2c14e;
+  --glow: #f7d98b;
+}
+
+@theme {
+  /* Exposed to Tailwind so utilities like text-ink and bg-surface exist and
+     stay in sync with the tokens above. */
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-accent: var(--accent);
+  --color-glow: var(--glow);
+
+  --font-display: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Public Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+}
+
+/*
+  NOTE ON THE 700ms CROSSFADE — deliberately not implemented as a transition.
+
+  The obvious approach is `transition: background-color 700ms` on everything
+  that paints a token. Measured in Chrome, that breaks the feature it was meant
+  to decorate: when a transitioned property's value comes from a custom
+  property that changes, the computed value freezes at the old colour and never
+  reaches the new one. Verified directly — with the transition removed,
+  background-color follows the token immediately; with it applied at either
+  700ms or 1ms, body stayed on the previous condition's colour indefinitely,
+  while background-image (not in the transition list, same element, same var)
+  updated correctly.
+
+  A palette that always changes beats a palette that fades but sometimes
+  doesn't, so the colours swap directly. Tier B's canvas layer is where the
+  motion budget goes instead.
+*/
+
+body {
+  background-color: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  /* A single soft light source behind the content, tinted by the condition.
+     fixed so it does not scroll away on long records lists. */
+  background-image: radial-gradient(
+    120% 90% at 50% -10%,
+    color-mix(in srgb, var(--glow) 22%, transparent) 0%,
+    transparent 60%
+  );
+  background-attachment: fixed;
+}
+
+@layer components {
+  /*
+    One panel primitive instead of repeating the same eight utilities on every
+    card. Raised surfaces are a translucent white over the atmosphere plus a
+    low-opacity hairline, so they pick up whatever the condition colour is
+    rather than being painted a fixed grey.
+  */
+  .panel {
+    background-color: var(--surface-raised);
+    border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+    border-radius: 1rem;
+    backdrop-filter: blur(12px);
+  }
+
+  /* Nested blocks inside a panel (stat tiles, table shell, record rows). */
+  .panel-inset {
+    background-color: color-mix(in srgb, var(--ink) 6%, transparent);
+    border: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
+    border-radius: 0.75rem;
+  }
+
+  /*
+    Numeric readouts. tabular-nums is the point of the mono face here: without
+    it, digits have different widths and a value ticking from 9 to 10 shifts
+    everything after it. An instrument should not jitter while you read it.
+  */
+  .readout {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+
+  /* Display face, reserved for the temperature and the location name. */
+  .display {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    letter-spacing: -0.02em;
+  }
+}
+
+/*
+  Tier B will add a motion layer; this establishes the contract now so the
+  reduced-motion path is never an afterthought. Anyone who has asked their OS
+  to reduce motion gets the palette without the 700ms crossfade.
+*/
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    /* `transition: none`, not `transition-duration: 1ms`. Setting only the
+       duration leaves transition-property at its default of `all`, which means
+       every colour is still technically transitioning — enough to re-trigger
+       the var-freeze described above and pin the whole palette to whatever
+       condition loaded first. Removing transitions outright avoids it. */
+    transition: none !important;
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

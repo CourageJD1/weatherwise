@@ -11,7 +11,7 @@ import { fetchRecordMap } from '../services/api.js';
 
 function AirQualityLine({ airQuality }) {
   if (!airQuality) {
-    return <p className="mt-2 text-xs text-slate-400">Air quality data unavailable.</p>;
+    return <p className="mt-2 text-xs text-[var(--ink-muted)]">Air quality data unavailable.</p>;
   }
   const parts = [
     airQuality.usAqi != null && `US AQI ${airQuality.usAqi}`,
@@ -20,7 +20,7 @@ function AirQualityLine({ airQuality }) {
     airQuality.pm10 != null && `PM10 ${airQuality.pm10} µg/m³`,
   ].filter(Boolean);
   return (
-    <p className="mt-2 text-xs text-slate-500">
+    <p className="mt-2 text-xs text-[var(--ink-muted)]">
       <span className="font-medium">Current air quality:</span> {parts.join(' · ') || '—'}
     </p>
   );
@@ -77,7 +77,7 @@ function LocationMap({ recordId }) {
     return (
       <div
         role="alert"
-        className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+        className="rounded-lg border border-red-400/40 bg-red-500/10 px-3 py-2 text-sm text-red-200"
       >
         Could not load the map: {error}
       </div>
@@ -88,11 +88,11 @@ function LocationMap({ recordId }) {
     <div>
       <div
         ref={containerRef}
-        className="h-64 w-full rounded-lg border border-slate-200 bg-slate-100"
+        className="h-64 w-full rounded-lg border border-[color-mix(in_srgb,var(--ink)_14%,transparent)] bg-[color-mix(in_srgb,var(--ink)_10%,transparent)]"
         aria-label={mapData ? `Map of ${mapData.locationName}` : 'Map loading'}
       >
         {!mapData && (
-          <p className="flex h-full items-center justify-center text-sm text-slate-400">
+          <p className="flex h-full items-center justify-center text-sm text-[var(--ink-muted)]">
             Loading map…
           </p>
         )}

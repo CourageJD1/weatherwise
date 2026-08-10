@@ -10,9 +10,9 @@ import ExportButtons from './ExportButtons.jsx';
 // height instead of pushing the map and insights off screen.
 function StoredDaysTable({ days }) {
   return (
-    <div className="max-h-64 overflow-y-auto rounded-lg border border-slate-200">
+    <div className="max-h-64 overflow-y-auto rounded-lg border border-[color-mix(in_srgb,var(--ink)_14%,transparent)]">
       <table className="w-full text-sm">
-        <thead className="sticky top-0 bg-slate-100 text-left text-xs uppercase tracking-wide text-slate-500">
+        <thead className="sticky top-0 bg-[color-mix(in_srgb,var(--ink)_10%,transparent)] text-left text-xs uppercase tracking-wide text-[var(--ink-muted)]">
           <tr>
             <th className="px-3 py-2 font-medium">Date</th>
             <th className="px-3 py-2 font-medium">Conditions</th>
@@ -21,26 +21,26 @@ function StoredDaysTable({ days }) {
             <th className="px-3 py-2 text-right font-medium">Precip</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100 bg-white">
+        <tbody className="divide-y divide-[color-mix(in_srgb,var(--ink)_10%,transparent)] bg-[var(--surface-raised)]">
           {days.map((day) => {
             const { label, icon } = describeWeather(day.weatherCode);
             return (
               <tr key={day.date}>
-                <td className="px-3 py-1.5 text-slate-700">{day.date}</td>
-                <td className="px-3 py-1.5 text-slate-600">
+                <td className="px-3 py-1.5 text-[var(--ink)]">{day.date}</td>
+                <td className="px-3 py-1.5 text-[var(--ink-muted)]">
                   <span role="img" aria-hidden="true" className="mr-1.5">
                     {icon}
                   </span>
                   {label}
                 </td>
-                <td className="px-3 py-1.5 text-right font-medium text-slate-800">
+                <td className="px-3 py-1.5 text-right font-medium text-[var(--ink)]">
                   {Math.round(day.tempMax)}°C
                 </td>
-                <td className="px-3 py-1.5 text-right text-slate-500">
+                <td className="px-3 py-1.5 text-right text-[var(--ink-muted)]">
                   {Math.round(day.tempMin)}°C
                 </td>
                 {/* precipitationProbability is null for archived past days */}
-                <td className="px-3 py-1.5 text-right text-sky-700">
+                <td className="px-3 py-1.5 text-right text-[var(--accent)]">
                   {day.precipitationProbability != null ? `${day.precipitationProbability}%` : '—'}
                 </td>
               </tr>
@@ -56,11 +56,11 @@ function RecordDetail({ record }) {
   const place = [record.locationName, record.country].filter(Boolean).join(', ');
 
   return (
-    <section className="rounded-2xl bg-white p-5 shadow-md sm:p-6">
+    <section className="panel p-5 sm:p-6">
       <header className="flex flex-wrap items-baseline justify-between gap-2">
         <div>
-          <h3 className="text-lg font-bold text-slate-800">{place}</h3>
-          <p className="text-xs text-slate-500">
+          <h3 className="text-lg font-bold text-[var(--ink)]">{place}</h3>
+          <p className="text-xs text-[var(--ink-muted)]">
             Record #{record.id} · {record.startDate} → {record.endDate} · lat{' '}
             {record.latitude.toFixed(4)}, lon {record.longitude.toFixed(4)}
           </p>

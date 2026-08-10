@@ -71,16 +71,16 @@ function RecordsView() {
         onCancel={() => setEditing(null)}
       />
 
-      <section className="rounded-2xl bg-white p-5 shadow-md sm:p-6">
+      <section className="panel p-5 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h3 className="text-lg font-bold text-slate-800">Saved records</h3>
+          <h3 className="text-lg font-bold text-[var(--ink)]">Saved records</h3>
           {records.length > 0 && <ExportButtons label="Export all:" />}
         </div>
 
         {deleteError && (
           <div
             role="alert"
-            className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+            className="mt-3 rounded-lg border border-red-400/40 bg-red-500/10 px-3 py-2 text-sm text-red-200"
           >
             Could not delete: {deleteError}
           </div>
@@ -88,7 +88,7 @@ function RecordsView() {
 
         <div className="mt-4">
           {status === 'loading' && (
-            <p className="py-6 text-center text-sm text-slate-400" role="status">
+            <p className="py-6 text-center text-sm text-[var(--ink-muted)]" role="status">
               Loading records…
             </p>
           )}
@@ -96,14 +96,14 @@ function RecordsView() {
           {status === 'error' && (
             <div
               role="alert"
-              className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+              className="rounded-lg border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-200"
             >
               <p>{loadError}</p>
               <button
                 type="button"
                 onClick={load}
-                className="mt-2 rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs
-                           font-medium text-red-700 hover:bg-red-100"
+                className="mt-2 rounded-lg border border-red-400/50 bg-[var(--surface-raised)] px-3 py-1.5 text-xs
+                           font-medium text-red-200 hover:bg-red-500/20"
               >
                 Retry
               </button>
