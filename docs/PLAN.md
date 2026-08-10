@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS weather_records (
   longitude       DECIMAL(9,6) NOT NULL,
   start_date      DATE NOT NULL,
   end_date        DATE NOT NULL,
-  weather_data    JSON NOT NULL,           -- [{date, tempMax, tempMin, precipitationProbability}, ...]
+  weather_data    JSON NOT NULL,           -- [{date, tempMax, tempMin, weatherCode, precipitationProbability}, ...]
   created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
