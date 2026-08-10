@@ -460,7 +460,7 @@ Quiz me. Ask me ten questions about this codebase that a technical interviewer
 might ask, wait for my answer to each one, then tell me what I got wrong or
 missed.
 ```
-
+  
 That last one is the highest-value prompt in this document.
 
 ---
