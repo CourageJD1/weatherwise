@@ -7,6 +7,22 @@ const FORECAST_URL = 'https://api.open-meteo.com/v1/forecast';
 const ARCHIVE_URL = 'https://archive-api.open-meteo.com/v1/archive';
 const AIR_QUALITY_URL = 'https://air-quality-api.open-meteo.com/v1/air-quality';
 
+// OpenStreetMap's geocoder, used ONLY as a fallback when Open-Meteo finds
+// nothing. Open-Meteo's geocoder searches populated places, so it has no entry
+// for landmarks ("Eiffel Tower", "Taj Mahal") or for postcodes outside the
+// handful of countries it indexes (UK and Japan both miss). The assessment
+// lists Landmarks and Postal Codes as supported input types, so those need a
+// geocoder that covers points of interest — which Nominatim does, for free and
+// without a key. Parameters verified against live responses before use.
+const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
+
+// Nominatim's usage policy requires a User-Agent identifying the application
+// and an contact address, and asks for at most one request per second. Both
+// are easy to honour here because this only runs when the primary geocoder has
+// already come back empty.
+const NOMINATIM_USER_AGENT =
+  'WeatherWise/1.0 (PM Accelerator technical assessment; writeddouglas@gmail.com)';
+
 // The archive API trails real time by ~5 days; use 6 for safety margin.
 // Dates newer than (today - ARCHIVE_LAG_DAYS) are served by the forecast
 // API's past_days parameter instead (plan decision 2).
@@ -109,7 +125,10 @@ export async function geocode(query) {
   }
 
   const data = await fetchJson(GEOCODE_URL, { name: trimmed, count: 5, language: 'en', format: 'json' });
-  if (!data.results?.length) throw new LocationNotFoundError(query);
+
+  // Nothing from the place-name geocoder: the input may be a landmark or a
+  // postcode it does not index, so try OpenStreetMap before giving up.
+  if (!data.results?.length) return geocodeViaNominatim(trimmed, query);
 
   return data.results.map((r) => ({
     name: r.name,
@@ -117,6 +136,52 @@ export async function geocode(query) {
     admin1: r.admin1 ?? null, // region/state, useful to disambiguate duplicates
     lat: r.latitude,
     lon: r.longitude,
+  }));
+}
+
+// Fallback geocoder. Returns candidates in the same shape as geocode() so
+// callers cannot tell which service answered.
+async function geocodeViaNominatim(trimmed, originalQuery) {
+  const url = `${NOMINATIM_URL}?${new URLSearchParams({
+    q: trimmed,
+    format: 'jsonv2',
+    limit: 5,
+    addressdetails: 1,
+    'accept-language': 'en', // without this, country comes back localised ("日本")
+  })}`;
+
+  let res;
+  try {
+    res = await fetch(url, {
+      headers: { 'User-Agent': NOMINATIM_USER_AGENT, 'Accept-Language': 'en' },
+      signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
+    });
+  } catch (cause) {
+    // The fallback failing must not turn a plain "not found" into a 502 — the
+    // user's input may simply be nonsense. Report it as not found and let the
+    // cause reach the server log.
+    console.error('Nominatim lookup failed:', cause.message);
+    throw new LocationNotFoundError(originalQuery);
+  }
+
+  let results = null;
+  try {
+    results = await res.json();
+  } catch {
+    // Non-JSON body; handled by the emptiness check below.
+  }
+  if (!res.ok || !Array.isArray(results) || results.length === 0) {
+    throw new LocationNotFoundError(originalQuery);
+  }
+
+  return results.map((r) => ({
+    // `name` is the POI or postcode itself; display_name's first segment is the
+    // fallback for entries that have no short name.
+    name: r.name || String(r.display_name ?? '').split(',')[0].trim(),
+    country: r.address?.country ?? null,
+    admin1: r.address?.state ?? r.address?.county ?? null,
+    lat: Number(r.lat),
+    lon: Number(r.lon),
   }));
 }
 

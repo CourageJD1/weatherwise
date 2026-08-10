@@ -171,6 +171,54 @@ All responses use the envelope `{ success, data, error }`.
 | `GET` | `/api/location/:id/map` | Map centre, bounding box, and air quality |
 | `POST` | `/api/insights` | AI weather briefing |
 
+## Where each assessment requirement is implemented
+
+**Tech Assessment #1 — Frontend**
+
+| Requirement | Implemented in |
+|---|---|
+| Enter a location (zip/postal, coordinates, landmark, town, city) | `frontend/src/components/SearchBar.jsx` → `backend/src/services/weatherService.js` (`geocode`) |
+| Current weather with useful details | `frontend/src/components/CurrentConditions.jsx` |
+| Weather for the user's current location | `frontend/src/App.jsx` (`getBrowserPosition`), with a permission-denied fallback message |
+| Icons / imagery | `frontend/src/utils/weatherCodes.js` — WMO code → icon and label |
+| **1.1** Five-day forecast | `frontend/src/components/Forecast.jsx` — 1 / 2 / 5 columns across breakpoints |
+| **1.2** Graceful error handling | Unknown location → `services/errors.js` `LocationNotFoundError`; upstream or backend failure → `frontend/src/services/api.js` |
+
+**Tech Assessment #2 — Backend**
+
+| Requirement | Implemented in |
+|---|---|
+| **2.1** CREATE with location + date range, validated and persisted | `backend/src/routes/records.js`, `backend/src/middleware/validate.js` |
+| **2.1** READ (all records and one) | `GET /api/records`, `GET /api/records/:id` |
+| **2.1** UPDATE with re-validation | `PUT /api/records/:id` — re-geocodes and re-fetches rather than hand-editing temperatures |
+| **2.1** DELETE | `DELETE /api/records/:id` |
+| Date-range validation | `middleware/validate.js` — real dates, start ≤ end, ≤ 90 days, ≤ 15 days ahead |
+| Location validation / fuzzy match | `services/weatherService.js` — top-ranked candidate, coordinate input bypasses the geocoder |
+| **2.2** Additional API integration | Leaflet + OpenStreetMap map and air quality (`routes/location.js`), AI briefing (`services/aiService.js`) |
+| **2.3** Export to five formats | `backend/src/utils/exporters.js`, served by `routes/export.js` |
+
+**Submission requirements**
+
+| Requirement | Where |
+|---|---|
+| Name visible in the app | `frontend/src/components/AboutFooter.jsx` |
+| PM Accelerator description + LinkedIn | `frontend/src/components/AboutFooter.jsx` |
+| Requirements list | `backend/package.json`, `frontend/package.json`, and the Requirements section above |
+
+## Notes on location lookup
+
+Two geocoders sit behind the search box. Open-Meteo answers first: it is fast,
+keyless, and good at populated places. It has no entry for landmarks, and it
+indexes postcodes for only some countries — "Eiffel Tower", "SW1A 1AA" and
+"100-0001" all return nothing. Since the brief lists Landmarks and Postal Codes
+as supported inputs, anything Open-Meteo cannot resolve falls through to
+OpenStreetMap's Nominatim, which covers points of interest and international
+postcodes. Coordinate-shaped input ("-20.32, 57.52") skips both and is parsed
+directly.
+
+Both lookups happen in the backend, so no third-party geocoder is ever called
+from the browser.
+
 ## Project layout
 
 ```
