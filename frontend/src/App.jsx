@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { themeFor, applyTheme } from './utils/theme.js';
+import { themeFor, themeNameFor, applyTheme } from './utils/theme.js';
+import WeatherCanvas from './components/WeatherCanvas.jsx';
 import SearchBar from './components/SearchBar.jsx';
 import CurrentConditions from './components/CurrentConditions.jsx';
 import Forecast from './components/Forecast.jsx';
@@ -114,7 +115,18 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen px-4 py-8 sm:py-12">
+    <div className="relative min-h-screen px-4 py-8 sm:py-12">
+      {/* Ambient layer. Driven by the same condition the palette uses, so the
+          colour and the motion always agree. */}
+      <WeatherCanvas
+        themeName={
+          result?.current
+            ? themeNameFor(result.current.weatherCode, result.current.isDay)
+            : 'clearDay'
+        }
+        windSpeed={result?.current?.windSpeed ?? 0}
+        precipitation={result?.current?.precipitation ?? 0}
+      />
       {/* One column capped at 42rem until lg, where the cap widens to 56rem so
           the forecast's five-across row gets usable card widths. */}
       <main className="mx-auto w-full max-w-2xl space-y-6 lg:max-w-4xl">

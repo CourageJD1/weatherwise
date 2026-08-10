@@ -18,7 +18,7 @@ function dayLabels(dateIso) {
 }
 
 function DayCard({ day }) {
-  const { label, icon } = describeWeather(day.weatherCode);
+  const { label, icon, motionClass } = describeWeather(day.weatherCode);
   const { weekday, date } = dayLabels(day.date);
 
   return (
@@ -31,7 +31,7 @@ function DayCard({ day }) {
         <p className="readout text-xs text-[var(--ink-muted)]">{date}</p>
       </div>
 
-      <span className="text-3xl" role="img" aria-label={label} title={label}>
+      <span className={`text-3xl ${motionClass}`} role="img" aria-label={label} title={label}>
         {icon}
       </span>
 

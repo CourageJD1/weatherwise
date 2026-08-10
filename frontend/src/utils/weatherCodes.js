@@ -32,7 +32,25 @@ const WEATHER_CODES = {
   99: { label: 'Thunderstorm with heavy hail', day: '⛈️', night: '⛈️' },
 };
 
+// CSS class that gives the icon motion matching its condition. Defined in
+// index.css; returns '' for codes with no natural movement so we don't animate
+// for the sake of it.
+function motionClassFor(code, isDay) {
+  const n = Number(code);
+  if (Number.isNaN(n)) return '';
+  if ((n === 0 || n === 1) && isDay) return 'icon-motion icon-sun';
+  if (n === 45 || n === 48) return 'icon-motion icon-fog';
+  if (n >= 95) return 'icon-motion icon-storm';
+  if ((n >= 71 && n <= 77) || n === 85 || n === 86) return 'icon-motion icon-snow';
+  if ((n >= 51 && n <= 67) || (n >= 80 && n <= 82)) return 'icon-motion icon-rain';
+  return '';
+}
+
 export function describeWeather(code, isDay = true) {
   const entry = WEATHER_CODES[code] ?? { label: 'Unknown conditions', day: '🌡️', night: '🌡️' };
-  return { label: entry.label, icon: isDay ? entry.day : entry.night };
+  return {
+    label: entry.label,
+    icon: isDay ? entry.day : entry.night,
+    motionClass: motionClassFor(code, isDay),
+  };
 }

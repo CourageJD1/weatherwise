@@ -36,7 +36,7 @@ function Stat({ label, value, detail }) {
 }
 
 function CurrentConditions({ title, location, current }) {
-  const { label, icon } = describeWeather(current.weatherCode, current.isDay);
+  const { label, icon, motionClass } = describeWeather(current.weatherCode, current.isDay);
   const subtitle = [location.admin1, location.country].filter(Boolean).join(', ');
 
   return (
@@ -50,7 +50,7 @@ function CurrentConditions({ title, location, current }) {
 
       {/* Hero row: icon, temperature, condition */}
       <div className="mt-4 flex items-center gap-4">
-        <span className="text-5xl sm:text-6xl" role="img" aria-label={label}>
+        <span className={`text-5xl sm:text-6xl ${motionClass}`} role="img" aria-label={label}>
           {icon}
         </span>
         <div>
