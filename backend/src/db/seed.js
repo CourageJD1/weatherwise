@@ -1,23 +1,40 @@
 import { pool } from '../config/db.js';
 import { initSchema } from './schema.js';
 
-// Builds one {date, tempMax, tempMin, precipitationProbability} entry per day
-// in the range. A sine wave around the base values gives day-to-day variation
-// that looks like real weather but stays deterministic across reruns.
+// WMO weather code implied by the day's rain chance, so seeded conditions
+// agree with the seeded precipitation instead of contradicting it. Same code
+// set Open-Meteo returns, and the same one the frontend's weatherCodes.js
+// renders — an unmapped value there would show "Unknown conditions".
+function weatherCodeFor(precipitationProbability) {
+  if (precipitationProbability < 20) return 0; // clear sky
+  if (precipitationProbability < 40) return 1; // mainly clear
+  if (precipitationProbability < 55) return 2; // partly cloudy
+  if (precipitationProbability < 70) return 3; // overcast
+  if (precipitationProbability < 85) return 61; // light rain
+  return 63; // rain
+}
+
+// Builds one {date, tempMax, tempMin, weatherCode, precipitationProbability}
+// entry per day in the range — the same shape weatherService.getHistorical
+// returns for real records, so seeded and created rows are indistinguishable
+// to exports and the UI. A sine wave around the base values gives day-to-day
+// variation that looks like real weather but stays deterministic across reruns.
 function buildDailyData(startDate, endDate, baseMax, baseMin, basePrecip) {
   const days = [];
   const cursor = new Date(`${startDate}T00:00:00Z`);
   const end = new Date(`${endDate}T00:00:00Z`);
   for (let i = 0; cursor <= end; i++, cursor.setUTCDate(cursor.getUTCDate() + 1)) {
     const wiggle = Math.sin(i * 1.7);
+    const precipitationProbability = Math.max(
+      0,
+      Math.min(100, Math.round(basePrecip + wiggle * 15))
+    );
     days.push({
       date: cursor.toISOString().slice(0, 10),
       tempMax: Math.round((baseMax + wiggle * 2.5) * 10) / 10,
       tempMin: Math.round((baseMin + wiggle * 2) * 10) / 10,
-      precipitationProbability: Math.max(
-        0,
-        Math.min(100, Math.round(basePrecip + wiggle * 15))
-      ),
+      weatherCode: weatherCodeFor(precipitationProbability),
+      precipitationProbability,
     });
   }
   return days;
