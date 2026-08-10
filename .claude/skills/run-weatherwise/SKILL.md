@@ -135,6 +135,15 @@ These cost real time; none are guessable from the README.
   ```
   If both are listening, kill both and start one.
 
+- **Switching git branches under a running Vite serves stale CSS.** After a
+  `git checkout` or `git merge`, the dev server can keep serving the previous
+  branch's stylesheet while serving the new JS. The app then renders on a white
+  background with near-invisible text and looks catastrophically broken, when
+  nothing is actually wrong with the code — `npm run build` succeeds and the
+  built CSS is correct. **Restart the dev server after any branch change**, and
+  before concluding a visual change broke something, compare the built CSS in
+  `dist/` against what the dev server returns.
+
 - **Chrome screenshots intermittently time out** with `Page.captureScreenshot
   timed out after 30000ms / the renderer may be frozen`. This happened ~5 times
   in one session and was never a real hang — **just take the screenshot again**
