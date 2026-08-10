@@ -123,7 +123,17 @@ function RecordsView() {
         </div>
       </section>
 
-      {selectedRecord && <RecordDetail record={selectedRecord} />}
+      {/* Keyed on updatedAt as well as id: editing the record you are viewing
+          keeps the same id, and without the timestamp the detail panel's map
+          and AI briefing would keep showing the PREVIOUS location while the
+          temperature table updated. The key remounts them, which is also why
+          neither child needs its own reset-on-prop-change effect. */}
+      {selectedRecord && (
+        <RecordDetail
+          key={`${selectedRecord.id}:${selectedRecord.updatedAt}`}
+          record={selectedRecord}
+        />
+      )}
     </div>
   );
 }

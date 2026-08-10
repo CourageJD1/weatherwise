@@ -1,22 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { fetchInsights } from '../services/api.js';
 
 // AI briefing for a saved record. Generated on demand (a button) rather than
 // automatically, so browsing records doesn't fire a Gemini call per click.
 // Failure is deliberately soft — a small note, never an intrusive error —
 // because the AI is an enrichment, not core data (plan decision 7).
+//
+// No reset-on-change logic here: RecordDetail is keyed on the record's id and
+// updatedAt, so a different record — or an edit to this one — remounts this
+// component and the generated advice can never outlive the data it describes.
 
 function InsightsPanel({ record }) {
   const [status, setStatus] = useState('idle'); // idle | loading | success | error
   const [insights, setInsights] = useState(null);
   const [error, setError] = useState(null);
-
-  // A different record means stale advice: reset to the button.
-  useEffect(() => {
-    setStatus('idle');
-    setInsights(null);
-    setError(null);
-  }, [record.id]);
 
   async function handleGenerate() {
     setStatus('loading');

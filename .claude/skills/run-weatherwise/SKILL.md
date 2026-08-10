@@ -123,16 +123,37 @@ These cost real time; none are guessable from the README.
   ```
   A `StartTime` older than your last edit means you are testing stale code.
 
+- **Vite silently moves to another port when 5173 is taken.** It prints
+  `Port 5173 is in use, trying another one...` and binds **5174**, then exits 0
+  and looks healthy. If an old dev server still holds 5173, your browser is
+  driving the *stale* one while you edit code that is being served by the new
+  one — changes appear not to apply, for no visible reason. This is the
+  frontend twin of the `EADDRINUSE` trap above, except Vite does not fail
+  loudly. **Always read the "Local:" line** and confirm it says 5173:
+  ```powershell
+  foreach ($p in @(5173,5174)) { $c = Get-NetTCPConnection -LocalPort $p -State Listen -ErrorAction SilentlyContinue; if ($c) { "port $p -> pid $($c.OwningProcess | Select-Object -First 1)" } else { "port $p free" } }
+  ```
+  If both are listening, kill both and start one.
+
 - **Chrome screenshots intermittently time out** with `Page.captureScreenshot
   timed out after 30000ms / the renderer may be frozen`. This happened ~5 times
   in one session and was never a real hang — **just take the screenshot again**
   and it succeeds. Do not go debugging the page.
 
-- **The first click after `navigate` often does not register.** It lands before
-  React hydrates, so the button takes focus but its handler never fires and the
-  view does not change. Seen twice on the Weather/Saved Records tabs. Screenshot
-  after clicking, and if the view did not change, **click the same spot again**
-  — it works the second time.
+- **MCP synthetic clicks intermittently focus a button without activating it.**
+  The element gets its focus ring, `aria-pressed` stays unchanged, and the view
+  does not switch — through repeated retries, a fresh tab, and both coordinate
+  and `ref` clicks. **The app is not at fault**: a native `.click()` via
+  `javascript_tool` on the same button works instantly every time. When a click
+  will not take, stop retrying and drive it with JavaScript:
+  ```js
+  [...document.querySelectorAll('button')].find(b => b.textContent.trim() === 'Saved Records').click()
+  ```
+  React-controlled inputs need the native setter, not `el.value =`:
+  ```js
+  const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+  set.call(el, 'Paris'); el.dispatchEvent(new Event('input', { bubbles: true }));
+  ```
 
 - **`form_input` sets date values directly and bypasses the `max` attribute**
   on `<input type="date">`. That is useful (it is how you test the
@@ -144,6 +165,13 @@ These cost real time; none are guessable from the README.
   records table and a blank column in CSV/PDF exports. The driver asserts
   `weatherCode` is present on create; if you touch `buildDailyData` or
   `mapDailyToDays`, keep the two shapes in sync.
+
+- **Editing a record does not change its id, so id alone is not a freshness
+  key.** `RecordDetail` is keyed on `` `${id}:${updatedAt}` `` because its map
+  and AI panel fetch per mount; keying on id alone left the map showing the
+  *previous* location after an in-place edit while the temperature table
+  updated. If you add another per-record fetch under the detail panel, rely on
+  that remount rather than adding your own `[recordId]` effect.
 
 - **`docs/PLAN.md` documents `weather_data` as
   `[{date, tempMax, tempMin, precipitationProbability}]`** — that comment is

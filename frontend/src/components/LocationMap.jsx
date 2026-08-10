@@ -31,12 +31,13 @@ function LocationMap({ recordId }) {
   const [mapData, setMapData] = useState(null);
   const [error, setError] = useState(null);
 
-  // Fetch map data whenever the selected record changes. The `stale` flag
-  // discards a late response if the user has already clicked another record.
+  // Fetch once per mount. RecordDetail is keyed on the record's id AND its
+  // updatedAt, so selecting a different record — or editing this one — gives
+  // this component a fresh instance rather than changing recordId underneath
+  // it. The `stale` flag still matters: it drops a late response if the
+  // component unmounts while the request is in flight.
   useEffect(() => {
     let stale = false;
-    setMapData(null);
-    setError(null);
     fetchRecordMap(recordId)
       .then((data) => !stale && setMapData(data))
       .catch((err) => !stale && setError(err.message));
