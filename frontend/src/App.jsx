@@ -3,6 +3,7 @@ import SearchBar from './components/SearchBar.jsx';
 import CurrentConditions from './components/CurrentConditions.jsx';
 import Forecast from './components/Forecast.jsx';
 import RecordsView from './components/RecordsView.jsx';
+import AboutFooter from './components/AboutFooter.jsx';
 import {
   fetchCurrentByQuery,
   fetchCurrentByCoords,
@@ -173,6 +174,10 @@ function App() {
             )}
           </>
         )}
+
+        {/* Outside the view switch so the author/PM Accelerator details the
+            assessment asks for are on screen whichever tab is open. */}
+        <AboutFooter />
       </main>
     </div>
   );
