@@ -34,6 +34,18 @@ app.use('/api/export', exportRouter);
 app.use('/api/insights', insightsRouter);
 app.use('/api/location', locationRouter);
 
+// Any /api path that matched no router above. Without this, Express's default
+// handler replies with an HTML error page, which breaks the frontend's
+// envelope parsing and contradicts the { success, data, error } contract every
+// other endpoint honours.
+app.use('/api', (req, res) => {
+  res.status(404).json({
+    success: false,
+    data: null,
+    error: `No such endpoint: ${req.method} ${req.originalUrl}`,
+  });
+});
+
 // Must be registered after all routes so thrown/next()ed errors land here.
 app.use(errorHandler);
 

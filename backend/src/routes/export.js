@@ -11,7 +11,12 @@ const router = Router();
 
 router.get('/:format', async (req, res, next) => {
   try {
-    const exporter = EXPORTERS[req.params.format];
+    // Object.hasOwn, not a plain lookup: EXPORTERS["constructor"] (or
+    // "__proto__", "toString", …) would find an inherited property, pass a
+    // truthy check, then blow up on exporter.render as a 500. Own keys only.
+    const exporter = Object.hasOwn(EXPORTERS, req.params.format)
+      ? EXPORTERS[req.params.format]
+      : null;
     if (!exporter) {
       throw new ValidationError(
         `Unknown export format "${req.params.format}". Supported formats: ${Object.keys(EXPORTERS).join(', ')}.`
