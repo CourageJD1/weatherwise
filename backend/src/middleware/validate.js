@@ -54,6 +54,30 @@ export function validateIdParam(req, res, next) {
   next();
 }
 
+// Guards POST /api/insights. Deliberately shallow: the AI service tolerates
+// any weather-data shape (it just serializes it into the prompt), so we only
+// require a location name and at least one piece of weather data to reason
+// about — enough to prevent a pointless Gemini call on an empty body.
+export function validateInsightsBody(req, res, next) {
+  const { location, current, forecast } = req.body ?? {};
+
+  if (typeof location !== 'string' || !location.trim()) {
+    return next(
+      new ValidationError('"location" is required and must be a non-empty display name.')
+    );
+  }
+  const hasCurrent = current && typeof current === 'object';
+  const hasForecast = Array.isArray(forecast) && forecast.length > 0;
+  if (!hasCurrent && !hasForecast) {
+    return next(
+      new ValidationError(
+        'Provide weather data to analyse: a "current" conditions object, a non-empty "forecast" array, or both.'
+      )
+    );
+  }
+  next();
+}
+
 // Validates { location, startDate, endDate } for CREATE and UPDATE, then
 // resolves the location. On success attaches the top-ranked geocoding
 // candidate as req.resolvedLocation so handlers never re-geocode.

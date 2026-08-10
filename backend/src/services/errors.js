@@ -29,3 +29,14 @@ export class UpstreamApiError extends Error {
     this.name = 'UpstreamApiError';
   }
 }
+
+// Thrown when GEMINI_API_KEY is not set. Distinct from UpstreamApiError
+// because nothing failed upstream — the optional AI feature is simply off.
+// Mapped to 503 so the frontend can quietly hide the insights panel while
+// every other feature keeps working.
+export class AiNotConfiguredError extends Error {
+  constructor() {
+    super('AI insights are not configured on this server.');
+    this.name = 'AiNotConfiguredError';
+  }
+}

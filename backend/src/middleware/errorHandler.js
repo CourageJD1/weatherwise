@@ -1,4 +1,9 @@
-import { ValidationError, LocationNotFoundError, UpstreamApiError } from '../services/errors.js';
+import {
+  ValidationError,
+  LocationNotFoundError,
+  UpstreamApiError,
+  AiNotConfiguredError,
+} from '../services/errors.js';
 
 // Central error middleware: maps typed errors to HTTP statuses and shapes
 // every failure as { success: false, data: null, error: message }. Must be
@@ -18,6 +23,11 @@ export function errorHandler(err, req, res, next) {
   }
   if (err instanceof LocationNotFoundError) {
     return res.status(404).json({ success: false, data: null, error: err.message });
+  }
+  if (err instanceof AiNotConfiguredError) {
+    // Not logged as an error: a missing GEMINI_API_KEY is a supported
+    // configuration, not a failure (the AI feature is optional by design).
+    return res.status(503).json({ success: false, data: null, error: err.message });
   }
   if (err instanceof UpstreamApiError) {
     // The client gets the clean message; the underlying cause (DNS failure,
