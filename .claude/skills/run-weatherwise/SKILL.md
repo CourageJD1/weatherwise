@@ -191,5 +191,7 @@ These cost real time; none are guessable from the README.
 | `Could not initialize the database` then exit 1 | MySQL is not up on 3308, or `backend/.env` is missing/wrong. Check the port with the prerequisites snippet. |
 | Driver: `cannot reach http://... (ECONNREFUSED) — is that server running?` | That server is down. Start it; the message names which URL failed. |
 | Driver: `SKIP  AI insights — GEMINI_API_KEY not configured` | Expected without a key. Not a failure. |
+| Driver: `SKIP  AI insights — upstream AI failure: ... HTTP 503` | Gemini is overloaded. Transient and on Google's side; the app hides the panel and everything else works. Rerun if you need it. |
+| Driver: a burst of failures right after starting the backend, but health passed | `npm run dev` uses `node --watch`, which restarts once more a second or two after the first "listening" line. The driver ran across that bounce. Wait for the output to settle, then rerun. |
 | Browser shows data but the UI is empty at :5000 | You are on the backend port. The UI is served by Vite on :5173. |
 | `npm run seed` succeeded but records look wrong in the UI | Seed wipes and recreates rows with new ids; reload the page. |
