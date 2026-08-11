@@ -16,9 +16,12 @@ AI Engineer Intern technical assessment by **Benijeh Douglas-Inegbedion**.
 
 ## Demo video
 
-> **TODO before submitting:** record a 1–2 minute screen share walking through
-> the code and the running app, upload it (YouTube / Google Drive / Vimeo), and
-> paste the viewable URL here.
+**https://youtu.be/rVfcFbgHDOY**
+
+A screen-recorded walkthrough of both the running application and the code
+behind it — location search and the five-day forecast, error handling, the full
+CRUD lifecycle with exports, the map and AI briefing, and the architectural
+decisions that hold it together.
 
 ## What it does
 
