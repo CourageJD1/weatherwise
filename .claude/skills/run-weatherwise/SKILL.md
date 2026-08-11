@@ -96,10 +96,26 @@ configuration, not a failure.
 
 ## Drive the UI (browser path)
 
-Only needed for visual/layout changes. There is **no `chromium-cli`,
-Playwright, xvfb, or tmux on this machine** — the browser harness is the
-Claude-in-Chrome MCP extension. Navigate to `http://localhost:5173/`, then use
-`mcp__claude-in-chrome__find` to get element refs and `computer` to click.
+Only needed for visual/layout changes. There is no `chromium-cli`, xvfb, or
+tmux on this machine, but two MCP browser harnesses are available. **Prefer the
+Playwright plugin** (`mcp__plugin_playwright_playwright__*`): its clicks are
+real events, so it does not need the JavaScript fallbacks the extension does.
+Its tools are deferred — load them in a single `ToolSearch` call:
+
+```
+select:mcp__plugin_playwright_playwright__browser_navigate,mcp__plugin_playwright_playwright__browser_snapshot,mcp__plugin_playwright_playwright__browser_click,mcp__plugin_playwright_playwright__browser_type,mcp__plugin_playwright_playwright__browser_take_screenshot
+```
+
+Navigate to `http://localhost:5173/`, then `browser_snapshot` for element refs
+(`e14`-style) and `browser_click` / `browser_type` against them. `browser_type`
+with `submit: true` fills the field and presses Enter in one call, which is the
+whole search interaction.
+
+The Claude-in-Chrome extension (`mcp__claude-in-chrome__*`) still works and
+drives your real Chrome profile — reach for it when you need a logged-in
+session or want to watch it happen. `find` gets refs, `computer` clicks. The
+quirks in Gotchas below marked *Claude-in-Chrome* are specific to it and do not
+apply to the Playwright path.
 
 Always drive the app through **:5173**, never by opening `frontend/index.html`
 or hitting :5000 directly. Vite proxies `/api` to the backend, and the frontend
@@ -144,17 +160,30 @@ These cost real time; none are guessable from the README.
   before concluding a visual change broke something, compare the built CSS in
   `dist/` against what the dev server returns.
 
-- **Chrome screenshots intermittently time out** with `Page.captureScreenshot
-  timed out after 30000ms / the renderer may be frozen`. This happened ~5 times
-  in one session and was never a real hang — **just take the screenshot again**
-  and it succeeds. Do not go debugging the page.
+- **Claude-in-Chrome screenshots intermittently time out** with
+  `Page.captureScreenshot timed out after 30000ms / the renderer may be
+  frozen`. This happened ~5 times in one session and was never a real hang —
+  **just take the screenshot again** and it succeeds. Do not go debugging the
+  page. Not observed on the Playwright path.
 
-- **MCP synthetic clicks intermittently focus a button without activating it.**
-  The element gets its focus ring, `aria-pressed` stays unchanged, and the view
-  does not switch — through repeated retries, a fresh tab, and both coordinate
-  and `ref` clicks. **The app is not at fault**: a native `.click()` via
-  `javascript_tool` on the same button works instantly every time. When a click
-  will not take, stop retrying and drive it with JavaScript:
+- **Playwright screenshots miss the output directory.** Its page snapshots land
+  in `.playwright-mcp/` (gitignored), but `browser_take_screenshot` with a bare
+  relative `filename` resolves against the **repo root** instead — so
+  `saved-records.png` lands beside `backend/`, where `.gitignore`'s
+  `Screenshot*.png` does not match it and the next `git add -A` sweeps it into a
+  commit. Pass the directory explicitly:
+  `filename: ".playwright-mcp/saved-records.png"`.
+
+- **Claude-in-Chrome synthetic clicks intermittently focus a button without
+  activating it.** The element gets its focus ring, `aria-pressed` stays
+  unchanged, and the view does not switch — through repeated retries, a fresh
+  tab, and both coordinate and `ref` clicks. **The app is not at fault**: a
+  native `.click()` via `javascript_tool` on the same button works instantly
+  every time. **This does not reproduce under the Playwright plugin** — the same
+  "Saved Records" tab flipped to `[pressed]` on the first `browser_click`
+  (checked 2026-08-11), which is the main reason to prefer that harness. On the
+  extension, when a click will not take, stop retrying and drive it with
+  JavaScript:
   ```js
   [...document.querySelectorAll('button')].find(b => b.textContent.trim() === 'Saved Records').click()
   ```
@@ -164,8 +193,8 @@ These cost real time; none are guessable from the README.
   set.call(el, 'Paris'); el.dispatchEvent(new Event('input', { bubbles: true }));
   ```
 
-- **`form_input` sets date values directly and bypasses the `max` attribute**
-  on `<input type="date">`. That is useful (it is how you test the
+- **Claude-in-Chrome's `form_input` sets date values directly and bypasses the
+  `max` attribute** on `<input type="date">`. That is useful (it is how you test the
   "too far in the future" rejection) but it means a passing form interaction
   does not prove the native picker constrains anything.
 
