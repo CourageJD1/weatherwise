@@ -21,3 +21,14 @@ Screenshot*.png
 
 # Personal prep material — not part of the submission
 WeatherWise-Video-Script.docx
+WeatherWise-Transcript.txt
+WeatherWise-Subtitles.srt
+
+# Recorded demo footage. The video is submitted as a hosted URL in the README,
+# never as a file in the repo — a public repo is not a video host.
+*.mp4
+*.mkv
+*.mov
+*.avi
+*.webm
+*.wmv
