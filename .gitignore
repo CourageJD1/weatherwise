@@ -12,3 +12,6 @@ build/
 # Editor/OS noise
 .DS_Store
 Thumbs.db
+
+# Local debug screenshots
+Screenshot*.png
