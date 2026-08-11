@@ -219,6 +219,32 @@ directly.
 Both lookups happen in the backend, so no third-party geocoder is ever called
 from the browser.
 
+## Accessibility and graceful degradation
+
+The interface is themed from the weather rather than from a fixed palette, and
+an ambient canvas layer animates the current conditions behind the panels.
+Neither is allowed to cost legibility or usability:
+
+- **Reduced motion is respected.** If the operating system reports
+  `prefers-reduced-motion: reduce`, the animation layer paints a single static
+  frame and stops — no loop, no cross-fade, no icon movement. The palette and
+  every reading stay exactly as they are. Run
+  `node frontend/scripts/check-contrast.mjs` to re-verify the colour side.
+- **Contrast is measured, not assumed.** Every text colour is checked against
+  its background in all seven weather palettes and must clear WCAG AA at 4.5:1.
+  The check is a script, so it can gate a change rather than relying on a
+  designer's eye. It caught the storm accent from the original design at
+  4.20:1, which was lightened until it passed.
+- **The animation never blocks the app.** The canvas is `pointer-events: none`
+  and `aria-hidden`, sits behind every panel, and pauses whenever the tab is
+  hidden so a background tab burns no CPU. Particle counts scale with viewport
+  area and device pixel ratio is capped, so a phone does not run a desktop's
+  workload.
+- **Nothing depends on it.** The layer is decoration over a fully working app:
+  disable JavaScript animation, throttle the GPU, or run with reduced motion
+  and every feature — search, forecast, records, exports, map, AI briefing —
+  behaves identically.
+
 ## Project layout
 
 ```
