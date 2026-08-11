@@ -217,6 +217,29 @@ button:disabled {
   filter: none;
 }
 
+/*
+  Touch targets.
+
+  The compact controls are sized for a mouse: measured on a 414px viewport, the
+  export pills were 25px tall and the record row's View/Edit/Delete 29px, with
+  40 of 44 buttons under the 44px that WCAG 2.5.5 and the platform guidelines
+  ask for. Precise with a cursor, fiddly with a thumb.
+
+  Triggered on narrow viewports OR any coarse pointer, so phones and touch
+  laptops both get it while the desktop layout is left exactly as designed.
+  min-height rather than padding, so nothing reflows or changes its type scale
+  — the buttons just gain a bigger hit area.
+*/
+@media (max-width: 40rem), (pointer: coarse) {
+  button,
+  summary,
+  [role='button'],
+  input:not([type='checkbox']):not([type='radio']),
+  select {
+    min-height: 44px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
