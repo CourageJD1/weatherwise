@@ -48,7 +48,7 @@ function isRealDate(value) {
 export function validateIdParam(req, res, next) {
   if (!/^[1-9]\d*$/.test(req.params.id)) {
     return next(
-      new ValidationError(`Record id must be a positive whole number, got "${req.params.id}".`)
+      new ValidationError(`"${req.params.id}" is not a valid record id. Ids are whole numbers like 1, 2, 3 — open the record from the list to use the right one.`)
     );
   }
   next();
@@ -93,25 +93,25 @@ export async function validateRecordBody(req, res, next) {
     for (const [field, value] of [['startDate', startDate], ['endDate', endDate]]) {
       if (!isRealDate(value)) {
         throw new ValidationError(
-          `"${field}" must be a real calendar date in YYYY-MM-DD format, got ${JSON.stringify(value ?? null)}.`
+          `The ${field === 'startDate' ? 'start' : 'end'} date ${JSON.stringify(value ?? null)} is not a real calendar date. Use the date picker, or type it as YYYY-MM-DD (for example 2026-08-11).`
         );
       }
     }
     if (startDate > endDate) {
       throw new ValidationError(
-        `"startDate" (${startDate}) must be on or before "endDate" (${endDate}).`
+        `The start date (${startDate}) is after the end date (${endDate}). Swap them, or pick a start date on or before ${endDate}.`
       );
     }
     const rangeDays = countDays(startDate, endDate);
     if (rangeDays > MAX_RANGE_DAYS) {
       throw new ValidationError(
-        `Date range covers ${rangeDays} days; the maximum is ${MAX_RANGE_DAYS} days.`
+        `That range covers ${rangeDays} days, and a record can hold at most ${MAX_RANGE_DAYS}. Shorten it to ${MAX_RANGE_DAYS} days or fewer, or save it as more than one record.`
       );
     }
     const maxEnd = addDaysIso(todayIso(), MAX_FUTURE_DAYS);
     if (endDate > maxEnd) {
       throw new ValidationError(
-        `"endDate" (${endDate}) is too far in the future — Open-Meteo's forecast only reaches ${MAX_FUTURE_DAYS} days ahead, so the latest allowed date is ${maxEnd}.`
+        `That end date (${endDate}) is further ahead than forecasts reach. Weather is only available up to ${MAX_FUTURE_DAYS} days out, so the latest allowed date is ${maxEnd}.`
       );
     }
 

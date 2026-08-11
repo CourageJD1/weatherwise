@@ -163,6 +163,60 @@ body {
   reduced-motion path is never an afterthought. Anyone who has asked their OS
   to reduce motion gets the palette without the 700ms crossfade.
 */
+/*
+  Focus indicator floor.
+
+  Components already carry Tailwind's `focus:outline-none focus:ring-*`, which
+  is a visible ring — but it fires on mouse clicks too, and any control that
+  ever loses those classes silently loses its focus indicator with it. This is
+  the guarantee: every focusable thing shows an accent outline when reached by
+  keyboard, whatever its component classes say.
+
+  !important is deliberate and narrow. Tailwind's `.focus\:outline-none:focus`
+  is a higher-specificity selector, so without it a keyboard user gets nothing
+  on exactly the controls that opted out. An accessibility floor should not be
+  overridable by a utility class.
+
+  :focus-visible, not :focus, so a mouse click does not leave a ring behind.
+*/
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--accent) !important;
+  outline-offset: 2px !important;
+}
+
+/*
+  Hover feedback, consistent across every control.
+
+  Deliberately transitions filter and opacity rather than background-color:
+  the themed colours come from custom properties, and transitioning a
+  var-derived colour is what froze the whole palette earlier (see the note at
+  the top of this file). Brightness and opacity are independent of the tokens,
+  so they animate safely.
+*/
+a,
+button,
+input,
+select,
+textarea,
+summary {
+  transition: filter 150ms ease, opacity 150ms ease, outline-color 150ms ease;
+}
+
+button:not(:disabled):hover,
+summary:hover {
+  filter: brightness(1.12);
+}
+
+button:disabled {
+  filter: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

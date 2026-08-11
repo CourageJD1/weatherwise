@@ -35,20 +35,20 @@ function validateFields({ location, startDate, endDate }) {
   const maxEnd = addDaysIso(todayIso(), MAX_FUTURE_DAYS);
 
   if (!location.trim()) {
-    errors.location = 'Enter a city, town, landmark, postal code, or "lat,lon" coordinates.';
+    errors.location = 'Enter a place to look up — a city, town, landmark, postal code, or "lat,lon" coordinates.';
   }
-  if (!startDate) errors.startDate = 'Pick a start date.';
-  if (!endDate) errors.endDate = 'Pick an end date.';
+  if (!startDate) errors.startDate = 'Pick the first day you want weather for.';
+  if (!endDate) errors.endDate = 'Pick the last day you want weather for.';
 
   if (startDate && endDate) {
     if (startDate > endDate) {
-      errors.endDate = 'End date must be on or after the start date.';
+      errors.endDate = `The end date is before the start date. Pick a day on or after ${startDate}.`;
     } else if (countDays(startDate, endDate) > MAX_RANGE_DAYS) {
-      errors.endDate = `Range covers ${countDays(startDate, endDate)} days; the maximum is ${MAX_RANGE_DAYS}.`;
+      errors.endDate = `That range covers ${countDays(startDate, endDate)} days, and a record holds at most ${MAX_RANGE_DAYS}. Shorten it, or save it as more than one record.`;
     }
   }
   if (endDate && endDate > maxEnd) {
-    errors.endDate = `Forecasts only reach ${MAX_FUTURE_DAYS} days ahead — the latest allowed date is ${maxEnd}.`;
+    errors.endDate = `Forecasts only reach ${MAX_FUTURE_DAYS} days ahead. Pick ${maxEnd} or earlier.`;
   }
   return errors;
 }

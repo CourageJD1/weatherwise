@@ -82,11 +82,21 @@ function RecordRow({ record, selected, onSelect, onEdit, onDelete, deleting }) {
 }
 
 function RecordList({ records, selectedId, onSelect, onEdit, onDelete, deletingId }) {
+  // Empty state invites the first action and shows what a record is for,
+  // rather than reporting that a list is empty.
   if (records.length === 0) {
     return (
-      <p className="py-6 text-center text-sm text-[var(--ink-muted)]">
-        No saved records yet — create one with the form above.
-      </p>
+      <div className="px-4 py-8 text-center">
+        <p className="text-3xl" aria-hidden="true">🗓️</p>
+        <p className="mt-2 text-sm font-semibold text-[var(--ink)]">
+          Save your first location
+        </p>
+        <p className="mx-auto mt-1 max-w-md text-sm text-[var(--ink-muted)]">
+          Pick a place and a date range in the form above and WeatherWise will fetch the
+          temperature for every day in that range and keep it. Saved records can be edited,
+          mapped, summarised by AI, and exported in five formats.
+        </p>
+      </div>
     );
   }
 
