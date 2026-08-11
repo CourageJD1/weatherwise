@@ -15,3 +15,6 @@ Thumbs.db
 
 # Local debug screenshots
 Screenshot*.png
+
+# Playwright MCP snapshot/trace output
+.playwright-mcp/
