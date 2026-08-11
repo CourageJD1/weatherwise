@@ -14,11 +14,11 @@ function StoredDaysTable({ days }) {
       <table className="w-full text-sm">
         <thead className="sticky top-0 bg-[color-mix(in_srgb,var(--ink)_10%,transparent)] text-left text-xs uppercase tracking-wide text-[var(--ink-muted)]">
           <tr>
-            <th className="px-3 py-2 font-medium">Date</th>
-            <th className="px-3 py-2 font-medium">Conditions</th>
-            <th className="px-3 py-2 text-right font-medium">Max</th>
-            <th className="px-3 py-2 text-right font-medium">Min</th>
-            <th className="px-3 py-2 text-right font-medium">Precip</th>
+            <th className="px-2 py-2 font-medium sm:px-3">Date</th>
+            <th className="px-2 py-2 font-medium sm:px-3">Conditions</th>
+            <th className="px-2 py-2 text-right font-medium sm:px-3">Max</th>
+            <th className="px-2 py-2 text-right font-medium sm:px-3">Min</th>
+            <th className="px-2 py-2 text-right font-medium sm:px-3">Precip</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-[color-mix(in_srgb,var(--ink)_10%,transparent)] bg-[var(--surface-raised)]">
@@ -26,21 +26,24 @@ function StoredDaysTable({ days }) {
             const { label, icon } = describeWeather(day.weatherCode);
             return (
               <tr key={day.date}>
-                <td className="px-3 py-1.5 text-[var(--ink)]">{day.date}</td>
-                <td className="px-3 py-1.5 text-[var(--ink-muted)]">
+                <td className="px-2 py-1.5 text-[var(--ink)] sm:px-3">{day.date}</td>
+                <td className="px-2 py-1.5 text-[var(--ink-muted)] sm:px-3">
                   <span role="img" aria-hidden="true" className="mr-1.5">
                     {icon}
                   </span>
-                  {label}
+                  {/* Label is the widest column. Below sm it is hidden visually
+                      but kept for screen readers — the icon alone is not an
+                      accessible substitute for the condition name. */}
+                  <span className="sr-only sm:not-sr-only">{label}</span>
                 </td>
-                <td className="px-3 py-1.5 text-right font-medium text-[var(--ink)]">
+                <td className="px-2 py-1.5 text-right font-medium text-[var(--ink)] sm:px-3">
                   {Math.round(day.tempMax)}°C
                 </td>
-                <td className="px-3 py-1.5 text-right text-[var(--ink-muted)]">
+                <td className="px-2 py-1.5 text-right text-[var(--ink-muted)] sm:px-3">
                   {Math.round(day.tempMin)}°C
                 </td>
                 {/* precipitationProbability is null for archived past days */}
-                <td className="px-3 py-1.5 text-right text-[var(--accent)]">
+                <td className="px-2 py-1.5 text-right text-[var(--accent)] sm:px-3">
                   {day.precipitationProbability != null ? `${day.precipitationProbability}%` : '—'}
                 </td>
               </tr>
