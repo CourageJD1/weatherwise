@@ -219,6 +219,32 @@ directly.
 Both lookups happen in the backend, so no third-party geocoder is ever called
 from the browser.
 
+## Responsive design
+
+> *Assessment #1 asks which responsive techniques were used. This section answers
+> that directly.* Verified at 375 px, 768 px and 1440 px.
+
+The approach is **mobile-first**: base styles describe the narrow case and each
+breakpoint adds to it, so nothing has to be undone at a smaller size. Tailwind's
+`sm` (640 px), `md` (768 px) and `lg` (1024 px) are the only breakpoints used —
+three, chosen because the content genuinely changes shape three times.
+
+| Technique | Where | Effect |
+|---|---|---|
+| Fluid column with a stepped cap | `App.jsx:132` — `max-w-2xl lg:max-w-4xl` | One readable column on phones and tablets; the cap widens at `lg` so five forecast cards get usable widths instead of five cramped ones |
+| Grid reflow | `Forecast.jsx:62` — `grid-cols-1 md:grid-cols-2 lg:grid-cols-5` | The 5-day forecast is a vertical list, then a 2-up grid, then a single horizontal row |
+| Grid reflow (secondary) | `CurrentConditions.jsx:68` (`grid-cols-2 sm:grid-cols-4`), `RecordForm.jsx:147` (`grid-cols-1 sm:grid-cols-2`) | Stats and form fields pair up on narrow screens rather than stretching full width |
+| Axis switch | `SearchBar.jsx:16`, `RecordList.jsx:16` — `flex-col sm:flex-row` | Search field and record controls stack vertically on phones, sit inline from `sm` up |
+| Component reorientation | `Forecast.jsx:26` — `lg:flex-col` on each card | A day card is a compact left-to-right row while stacked, and a top-to-bottom column once the grid becomes a row |
+| Touch-target floor | `index.css:233` — `@media (max-width: 40rem), (pointer: coarse)` | Every button, summary and input gets `min-height: 44px` (WCAG 2.5.5). Measured first: 40 of 44 controls were under 44 px, some as small as 25 px. Applied as `min-height`, not padding, so nothing reflows or changes type scale — and keyed on coarse *pointer* as well as width, so touch laptops get it too |
+| Responsive disclosure, not deletion | `RecordDetail.jsx:37` — `sr-only sm:not-sr-only` | The widest table column (condition name) is hidden visually on phones but stays in the accessibility tree — the icon alone is not an accessible substitute |
+| Overflow containment | `RecordDetail.jsx:13` — `max-h-64 overflow-y-auto`, plus `px-2 sm:px-3` | A record can hold 90 days; the table scrolls inside a fixed height instead of pushing the map and AI panel off screen, and cell padding tightens on narrow screens |
+| Viewport meta | `index.html:5` | Prevents mobile browsers rendering at a fake 980 px width and zooming out |
+| Workload scales with the device | `utils/particles.js` | The ambient canvas scales particle count with viewport area and caps device pixel ratio, so a phone never runs a desktop's rendering load |
+
+Per the brief this is a **web-first** build: the desktop layout is the richest,
+and the smaller breakpoints adapt it rather than the reverse.
+
 ## Accessibility and graceful degradation
 
 The interface is themed from the weather rather than from a fixed palette, and

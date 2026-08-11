@@ -18,3 +18,6 @@ Screenshot*.png
 
 # Playwright MCP snapshot/trace output
 .playwright-mcp/
+
+# Personal prep material — not part of the submission
+WeatherWise-Video-Script.docx

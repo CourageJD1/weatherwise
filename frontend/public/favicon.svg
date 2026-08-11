@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Sun behind cloud, drawn in the app's accent + surface colours so the
+       tab icon matches the UI. Flat shapes only: no gradients or filters,
+       which keeps it legible at 16px. -->
+  <rect width="32" height="32" rx="7" fill="#1e3a4c"/>
+  <circle cx="20.5" cy="12" r="6" fill="#f2c14e"/>
+  <path d="M9 23a4.6 4.6 0 0 1 .5-9.2 6.4 6.4 0 0 1 12.1 1.6A4.1 4.1 0 0 1 21.3 23z" fill="#eef4f7"/>
+</svg>
