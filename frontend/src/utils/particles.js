@@ -16,7 +16,16 @@ export const TUNING = {
     perMegapixel: { rain: 260, snow: 130, fog: 5, dust: 45, stars: 220, haze: 14 },
     maxParticles: 420, // hard ceiling on any viewport
     minParticles: 12,
+    // The soft-blob systems are meant to be "a few large shapes". The global
+    // minimum of 12 defeats that: fog's own budget is 3 blobs on a laptop, so
+    // the clamp was forcing four times as many onto every screen — measured at
+    // 82% coverage on a phone, which is a white wash, not atmosphere.
+    minPerKind: { fog: 3, haze: 4 },
   },
+
+  // Blob radii below are authored for roughly this viewport width and scaled
+  // down on narrower screens. A 340px blob on a 390px phone is full-width.
+  referenceWidthPx: 1280,
 
   rain: {
     speedPxPerSec: [700, 1100], // fall speed range
@@ -44,9 +53,15 @@ export const TUNING = {
 
   fog: {
     // A few large soft blobs at very low opacity.
+    //
+    // These alphas are a CONTRAST constraint, not a taste one. Panels are ~7%
+    // opaque with a backdrop blur, so anything drawn behind them bleeds through
+    // and lightens the effective background for panel text. Measured: a 6.4%
+    // white wash drops accent-on-panel from 5.12:1 to 4.23:1, under WCAG AA.
+    // Keep the mean well under ~3%.
     radiusPx: [140, 340],
     speedPxPerSec: [6, 20],
-    alpha: [0.05, 0.12],
+    alpha: [0.025, 0.06],
   },
 
   // Clear day: sparse motes catching the light.
@@ -70,7 +85,7 @@ export const TUNING = {
   haze: {
     radiusPx: [90, 220],
     speedPxPerSec: [4, 14],
-    alpha: [0.03, 0.07],
+    alpha: [0.02, 0.045], // same contrast constraint as fog above
   },
 
   storm: {
@@ -94,10 +109,8 @@ function budgetFor(kind, width, height) {
   const megapixels = (width * height) / 1_000_000;
   const perMp = TUNING.density.perMegapixel[kind] ?? 0;
   const raw = Math.round(perMp * megapixels);
-  return Math.max(
-    TUNING.density.minParticles,
-    Math.min(TUNING.density.maxParticles, raw)
-  );
+  const min = TUNING.density.minPerKind[kind] ?? TUNING.density.minParticles;
+  return Math.max(min, Math.min(TUNING.density.maxParticles, raw));
 }
 
 /* -------------------------------- systems ---------------------------------- */
@@ -221,10 +234,15 @@ function snowSystem(width, height, env) {
 // differ only in size, speed and opacity.
 function blobSystem(kind, width, height) {
   const cfg = TUNING[kind];
+  // Narrow viewports get proportionally smaller blobs, or the layer stops
+  // reading as haze and becomes an opaque sheet over the whole screen.
+  // Floor of 0.5, not lower: at 0.35 the overcast haze measured 0.2% coverage
+  // on a phone, i.e. invisible, and overcast is the most common condition.
+  const scale = Math.max(0.5, Math.min(1.2, width / TUNING.referenceWidthPx));
   const blobs = Array.from({ length: budgetFor(kind, width, height) }, () => ({
     x: rand(-0.2, 1.2) * width,
     y: rand(0, height),
-    r: rand(...cfg.radiusPx),
+    r: rand(...cfg.radiusPx) * scale,
     vx: rand(...cfg.speedPxPerSec) * (Math.random() < 0.5 ? -1 : 1),
     vy: rand(-6, 6),
     alpha: rand(...cfg.alpha),
